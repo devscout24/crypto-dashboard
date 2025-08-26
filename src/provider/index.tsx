@@ -2,6 +2,8 @@ import { routes } from "@/routes/Router";
 import { RouterProvider } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { useAuth } from "@/hooks/useAuth";
+import { SSEProvider } from "@/contexts/SSEProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,26 +21,14 @@ const queryClient = new QueryClient({
 });
 
 export default function Providers() {
+  const currentUser = useAuth();
+
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={routes} />
-      <ReactQueryDevtools initialIsOpen={false} />
+      <SSEProvider url="/api/v1/sse/public">
+        <RouterProvider router={routes} />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </SSEProvider>
     </QueryClientProvider>
   );
 }
-
-// import { BrowserRouter } from "react-router";
-
-// export default function Providers() {
-//   return (
-//     <SocketProvider userId={currentUser?.id as string}>
-//       <Provider store={store}>
-//         <PersistGate loading={null} persistor={persistor}>
-//           <BrowserRouter>
-//             <AppRoutes />
-//           </BrowserRouter>
-//         </PersistGate>
-//       </Provider>
-//     </SocketProvider>
-//   );
-// }

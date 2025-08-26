@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/chart";
 import { useEffect, useState, Suspense } from "react";
 import Loader from "@/components/Loader";
-import type { NavChartData } from "@/types/chart";
 import CustomTooltipContent from "./CustomTooltipContent";
 import CustomTooltipCursor from "./CustomTooltipCursor";
 import { useChartData } from "@/hooks/useChartData";
-import ErrorMessage from "@/components/ErrorMessage";
+import { Button } from "@/components/ui/button";
+import type { NavChartData } from "@/types/chart";
 
 const chartConfig = {
   total_nav: {
@@ -64,8 +64,7 @@ function ChartContent({ activeMonth }: { activeMonth: string }) {
   const {
     data: dataToUse,
     isLoading,
-    error,
-    isSocketActive,
+    isConnected,
     requestChartData,
   } = useChartData(activeMonth, currentMonth);
 
@@ -147,75 +146,43 @@ function ChartContent({ activeMonth }: { activeMonth: string }) {
     });
   };
 
-  // Handle different error states
-  if (error) {
-    switch (error.code) {
-      case "RATE_LIMIT_EXCEEDED": {
-        const retryTime = error.data as { resetInSeconds: number };
-        return (
-          <ErrorMessage
-            title="Rate Limit Exceeded"
-            message={`${error.message} Please wait ${retryTime.resetInSeconds} seconds before trying again.`}
-          />
-        );
-      }
-
-      case "SERVICE_UNAVAILABLE":
-        return (
-          <ErrorMessage
-            title="Service Unavailable"
-            message="The chart data service is temporarily unavailable. Please try again later."
-            buttonText="Try Again"
-            onButtonClick={() =>
-              requestChartData(activeMonth, new Date().getFullYear())
-            }
-          />
-        );
-
-      case "NO_DATA":
-        return (
-          <ErrorMessage
-            title="No Data Available"
-            message={`No data available for ${
-              activeMonth.charAt(0).toUpperCase() + activeMonth.slice(1)
-            }. Try selecting a different month.`}
-            buttonText="Retry"
-            onButtonClick={() =>
-              requestChartData(activeMonth, new Date().getFullYear())
-            }
-          />
-        );
-
-      default:
-        return (
-          <ErrorMessage
-            title="Error Loading Chart"
-            message={error.message}
-            buttonText={isSocketActive ? "Retry" : "Reload"}
-            onButtonClick={() =>
-              requestChartData(activeMonth, new Date().getFullYear())
-            }
-          />
-        );
-    }
-  }
-
   if (isLoading) {
     return <ChartSuspenseFallback />;
   }
 
   if (chartData.length === 0) {
     return (
-      <ErrorMessage
-        title="No Data"
-        message={`No data available for ${
-          activeMonth.charAt(0).toUpperCase() + activeMonth.slice(1)
-        }. Try selecting a different month.`}
-        buttonText={isSocketActive ? "Retry" : "Reload"}
-        onButtonClick={() =>
-          requestChartData(activeMonth, new Date().getFullYear())
-        }
-      />
+      <div className="text-center p-4 h-[230px] flex items-center justify-center">
+        <div>
+          <p>
+            No data available for{" "}
+            {activeMonth.charAt(0).toUpperCase() + activeMonth.slice(1)}
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            Try selecting a different month
+          </p>
+          {isConnected ? (
+            <button
+              onClick={() =>
+                requestChartData(activeMonth, new Date().getFullYear())
+              }
+              className="mt-2 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+            >
+              Retry Again
+            </button>
+          ) : (
+            <Button
+              variant={"outline"}
+              onClick={() => {
+                requestChartData(activeMonth, new Date().getFullYear());
+              }}
+              className="mt-2"
+            >
+              Reload
+            </Button>
+          )}
+        </div>
+      </div>
     );
   }
 

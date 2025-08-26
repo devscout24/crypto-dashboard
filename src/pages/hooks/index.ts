@@ -1,204 +1,131 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useSocket } from "@/hooks/useSocket";
-import { useCallback, useEffect } from "react";
+import { useSSE } from "@/hooks/useSSE";
+import { useCallback, useEffect, useState } from "react";
+import type { SSEMessage } from "@/types/sse.types";
+
+// Custom hook for SSE with error handling
+function useSSEWithErrors<T>(event: string) {
+  const { addEventListener, isConnected } = useSSE();
+  const [data, setData] = useState<T | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isConnected) return;
+
+    addEventListener<T>(event, (message: SSEMessage<T>) => {
+      setData(message.data);
+      setError(null);
+      setLoading(false);
+    });
+
+    // Error listener
+    addEventListener<{ message: string }>(
+      "error",
+      (message: SSEMessage<{ message: string }>) => {
+        setError(new Error(message.data.message));
+        setLoading(false);
+      }
+    );
+  }, [addEventListener, isConnected, event]);
+
+  return {
+    data,
+    error,
+    loading,
+    isConnected,
+  };
+}
 
 // Enhanced crypto nav history hook
 export function useCryptoNavHistory() {
-  return useSocket<any[]>(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_nav_history",
-      errorEvent: "crypto_nav_history_error",
-    }
-  );
+  return useSSEWithErrors<any[]>("crypto_nav_history");
 }
 
 // Enhanced crypto portfolio hook
 export function useCryptoPortfolio() {
-  return useSocket(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_portfolio_latest",
-      errorEvent: "crypto_portfolio_latest_error",
-    }
-  );
+  return useSSEWithErrors("crypto_portfolio_latest");
 }
 
 // Enhanced crypto asset performance hook
 export function useCryptoAssetPerformance() {
-  return useSocket(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_asset_performance",
-      errorEvent: "crypto_asset_performance_error",
-    }
-  );
+  return useSSEWithErrors("crypto_asset_performance");
 }
 
 // Enhanced crypto chart data hook with month support
 export function useCryptoChartData() {
-  const hook = useSocket<any[]>(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_chart_data",
-      errorEvent: "crypto_chart_data_error",
-    }
-  );
+  const { addEventListener, isConnected } = useSSE();
+  const [data, setData] = useState<any[] | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Auto-request current month data on connection
   useEffect(() => {
-    if (hook.isConnected) {
-      const currentMonth = new Date()
-        .toLocaleString("default", { month: "long" })
-        .toLowerCase();
-      const currentYear = new Date().getFullYear();
+    if (!isConnected) return;
 
-      console.log(
-        "Auto-requesting chart data for current month:",
-        currentMonth
-      );
-      hook.emit("request_chart_data", {
-        month: currentMonth,
-        year: currentYear,
+    addEventListener<any[]>(
+      "crypto_chart_data",
+      (message: SSEMessage<any[]>) => {
+        setData(message.data);
+        setError(null);
+        setLoading(false);
+      }
+    );
+
+    // Error listener
+    addEventListener<{ message: string }>(
+      "crypto_chart_data_error",
+      (message: SSEMessage<{ message: string }>) => {
+        setError(new Error(message.data.message));
+        setLoading(false);
+      }
+    );
+  }, [addEventListener, isConnected]);
+
+  // Enhanced function for requesting specific month data
+  const requestMonthData = useCallback((month: string, year?: number) => {
+    const requestYear = year || new Date().getFullYear();
+    console.log(`Requesting chart data for ${month} ${requestYear}`);
+
+    // In SSE, we would typically make a separate HTTP request for this
+    // or have the server push data based on some other mechanism
+    fetch(`/api/chart-data?month=${month.toLowerCase()}&year=${requestYear}`)
+      .then((response) => response.json())
+      .then((chartData) => {
+        setData(chartData);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err);
+        setLoading(false);
       });
-    }
-  }, [hook.isConnected, hook.emit]);
-
-  // Enhanced emit function for requesting specific month data
-  const requestMonthData = useCallback(
-    (month: string, year?: number) => {
-      const requestYear = year || new Date().getFullYear();
-      console.log(`Requesting chart data for ${month} ${requestYear}`);
-
-      hook.emit("request_chart_data", {
-        month: month.toLowerCase(),
-        year: requestYear,
-      });
-    },
-    [hook.emit]
-  );
+  }, []);
 
   return {
-    ...hook,
+    data,
+    error,
+    loading,
+    isConnected,
     requestMonthData,
   };
 }
 
-// export function useCryptoChartData(url?: string) {
-//   return useSocket<any[]>(
-//     {
-//       url: url || import.meta.env.REACT_APP_SOCKET_URL,
-//       options: {
-//         autoConnect: true,
-//         reconnection: true,
-//         reconnectionAttempts: 5,
-//         reconnectionDelay: 1000,
-//       },
-//     },
-//     {
-//       event: "crypto_chart_data",
-//       errorEvent: "crypto_chart_data_error",
-//     }
-//   );
-// }
-
 // Enhanced crypto system status hook
 export function useCryptoSystemStatus() {
-  return useSocket(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_system_status",
-      errorEvent: "crypto_system_status_error",
-    }
-  );
+  return useSSEWithErrors("crypto_system_status");
 }
 
 // Enhanced crypto current prices hook
 export function useCryptoCurrentPrices() {
-  return useSocket(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_current_prices",
-      errorEvent: "crypto_current_prices_error",
-    }
-  );
+  return useSSEWithErrors("crypto_current_prices");
 }
 
 // Enhanced crypto portfolio summary hook
 export function useCryptoPortfolioSummary() {
-  return useSocket(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_portfolio_summary",
-      errorEvent: "crypto_portfolio_summary_error",
-    }
-  );
+  return useSSEWithErrors("crypto_portfolio_summary");
 }
 
 // Enhanced crypto health check hook
 export function useCryptoHealthCheck() {
-  return useSocket(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_health_check",
-      errorEvent: "crypto_health_check_error",
-    }
-  );
+  return useSSEWithErrors("crypto_health_check");
 }
