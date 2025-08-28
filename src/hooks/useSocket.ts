@@ -34,7 +34,7 @@ export interface UseSocketReturn<T = any> {
 }
 
 export function useSocket<T = any>(
-  config: SocketConfig,
+  // config: SocketConfig,
   eventConfig: SocketEventConfig
 ): UseSocketReturn<T> {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -50,8 +50,7 @@ export function useSocket<T = any>(
   const socketRef = useRef<Socket | null>(null);
 
   // Memoize the socket URL and config to prevent unnecessary re-renders
-  const socketUrl =
-    import.meta.env.VITE_APP_SOCKET_URL || "http://172.16.100.26:8080";
+  const socketUrl = import.meta.env.VITE_APP_SOCKET_URL;
 
   // const socketOptions = useRef({
   //   autoConnect: true,

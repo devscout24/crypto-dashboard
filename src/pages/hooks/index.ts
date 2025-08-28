@@ -5,74 +5,34 @@ import { useCallback, useEffect } from "react";
 
 // Enhanced crypto nav history hook
 export function useCryptoNavHistory() {
-  return useSocket<any[]>(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_nav_history",
-      errorEvent: "crypto_nav_history_error",
-    }
-  );
+  return useSocket<any[]>({
+    event: "crypto_nav_history",
+    errorEvent: "crypto_nav_history_error",
+  });
 }
 
 // Enhanced crypto portfolio hook
 export function useCryptoPortfolio() {
-  return useSocket(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_portfolio_latest",
-      errorEvent: "crypto_portfolio_latest_error",
-    }
-  );
+  return useSocket({
+    event: "crypto_portfolio_latest",
+    errorEvent: "crypto_portfolio_latest_error",
+  });
 }
 
 // Enhanced crypto asset performance hook
 export function useCryptoAssetPerformance() {
-  return useSocket(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_asset_performance",
-      errorEvent: "crypto_asset_performance_error",
-    }
-  );
+  return useSocket({
+    event: "crypto_asset_performance",
+    errorEvent: "crypto_asset_performance_error",
+  });
 }
 
 // Enhanced crypto chart data hook with month support
 export function useCryptoChartData() {
-  const hook = useSocket<any[]>(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_chart_data",
-      errorEvent: "crypto_chart_data_error",
-    }
-  );
+  const hook = useSocket<any[]>({
+    event: "crypto_chart_data",
+    errorEvent: "crypto_chart_data_error",
+  });
 
   // Auto-request current month data on connection
   useEffect(() => {
@@ -113,92 +73,34 @@ export function useCryptoChartData() {
   };
 }
 
-// export function useCryptoChartData(url?: string) {
-//   return useSocket<any[]>(
-//     {
-//       url: url || import.meta.env.REACT_APP_SOCKET_URL,
-//       options: {
-//         autoConnect: true,
-//         reconnection: true,
-//         reconnectionAttempts: 5,
-//         reconnectionDelay: 1000,
-//       },
-//     },
-//     {
-//       event: "crypto_chart_data",
-//       errorEvent: "crypto_chart_data_error",
-//     }
-//   );
-// }
-
 // Enhanced crypto system status hook
 export function useCryptoSystemStatus() {
-  return useSocket(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_system_status",
-      errorEvent: "crypto_system_status_error",
-    }
-  );
+  return useSocket({
+    event: "crypto_system_status",
+    errorEvent: "crypto_system_status_error",
+  });
 }
 
 // Enhanced crypto current prices hook
 export function useCryptoCurrentPrices() {
-  return useSocket(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_current_prices",
-      errorEvent: "crypto_current_prices_error",
-    }
-  );
+  return useSocket({
+    event: "crypto_current_prices",
+    errorEvent: "crypto_current_prices_error",
+  });
 }
 
 // Enhanced crypto portfolio summary hook
 export function useCryptoPortfolioSummary() {
-  return useSocket(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_portfolio_summary",
-      errorEvent: "crypto_portfolio_summary_error",
-    }
-  );
+  return useSocket({
+    event: "crypto_portfolio_summary",
+    errorEvent: "crypto_portfolio_summary_error",
+  });
 }
 
 // Enhanced crypto health check hook
 export function useCryptoHealthCheck() {
-  return useSocket(
-    {
-      options: {
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      },
-    },
-    {
-      event: "crypto_health_check",
-      errorEvent: "crypto_health_check_error",
-    }
-  );
+  return useSocket({
+    event: "crypto_health_check",
+    errorEvent: "crypto_health_check_error",
+  });
 }
