@@ -13,6 +13,9 @@ import {
   ChartTooltip,
 } from "@/components/ui/chart";
 import { useEffect, useState } from "react";
+import { useNavChartData } from "@/queries/cryptoQueries";
+import type { TNavChartData } from "@/types";
+import Loader from "@/components/Loader";
 // import { useNavChartData } from "@/queries/cryptoQueries";
 // import type { TNavChartData } from "@/types";
 // import Loader from "@/components/Loader";
@@ -32,105 +35,51 @@ type TChart = {
   datetime: string;
 };
 
-const navChartData: { data: TChart[] } = {
-  data: [
-    {
-      date: "2024-07-01",
-      time: "09:00",
-      nav: 100000,
-      endingNav: 103000,
-      datetime: "2024-07-01T09:00:00.000Z",
-    },
-    {
-      date: "2024-07-02",
-      time: "09:00",
-      nav: 101000,
-      endingNav: 108000,
-      datetime: "2024-07-02T09:00:00.000Z",
-    },
-    {
-      date: "2024-07-03",
-      time: "09:00",
-      nav: 102000,
-      endingNav: 107000,
-      datetime: "2024-07-03T09:00:00.000Z",
-    },
-    {
-      date: "2024-07-04",
-      time: "09:00",
-      nav: 101500,
-      endingNav: 106000,
-      datetime: "2024-07-04T09:00:00.000Z",
-    },
-    {
-      date: "2024-07-05",
-      time: "09:00",
-      nav: 103000,
-      endingNav: 109000,
-      datetime: "2024-07-05T09:00:00.000Z",
-    },
-    {
-      date: "2024-07-06",
-      time: "09:00",
-      nav: 104000,
-      endingNav: 110000,
-      datetime: "2024-07-06T09:00:00.000Z",
-    },
-    {
-      date: "2024-07-07",
-      time: "09:00",
-      nav: 105000,
-      endingNav: 114000,
-      datetime: "2024-07-07T09:00:00.000Z",
-    },
-  ],
-};
-
 export default function TotalNavChart() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [minValue, setMinValue] = useState(0);
   const [maxValue, setMaxValue] = useState(1000);
   const [dynamicTicks, setDynamicTicks] = useState<number[]>([]);
 
-  // const {
-  //   data: navChartData,
-  //   isPending,
-  //   error,
-  // } = useNavChartData({
-  //   period: "30d",
-  // });
+  const {
+    data: navChartData,
+    isPending,
+    error,
+  } = useNavChartData({
+    period: "30d",
+  });
 
-  // useEffect(() => {
-  //   if (navChartData) {
-  //     const formattedData = navChartData?.data.map((d: TNavChartData) => ({
-  //       date: d.date,
-  //       total_nav: d.endingNav,
-  //       time: new Date(d.datetime).toLocaleTimeString("en-US", {
-  //         hour: "2-digit",
-  //         minute: "2-digit",
-  //         second: "2-digit",
-  //       }),
-  //     }));
-  //     setChartData(formattedData);
+  useEffect(() => {
+    if (navChartData) {
+      const formattedData = navChartData?.data.map((d: TNavChartData) => ({
+        date: d.date,
+        total_nav: d.endingNav,
+        time: new Date(d.datetime).toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }),
+      }));
+      setChartData(formattedData);
 
-  //     const values = formattedData.map((d: any) => d.total_nav);
-  //     const dataMin = Math.min(...values);
-  //     const dataMax = Math.max(...values);
+      const values = formattedData.map((d: any) => d.total_nav);
+      const dataMin = Math.min(...values);
+      const dataMax = Math.max(...values);
 
-  //     const padding = (dataMax - dataMin) * 0.1;
-  //     const newMinValue = Math.floor(dataMin - padding);
-  //     const newMaxValue = Math.ceil(dataMax + padding);
-  //     setMinValue(newMinValue);
-  //     setMaxValue(newMaxValue);
+      const padding = (dataMax - dataMin) * 0.1;
+      const newMinValue = Math.floor(dataMin - padding);
+      const newMaxValue = Math.ceil(dataMax + padding);
+      setMinValue(newMinValue);
+      setMaxValue(newMaxValue);
 
-  //     const tickCount = 5;
-  //     const tickStep = (newMaxValue - newMinValue) / (tickCount - 1);
-  //     const newDynamicTicks = Array.from({ length: tickCount }, (_, i) =>
-  //       Math.round(newMinValue + tickStep * i)
-  //     );
-  //     setDynamicTicks(newDynamicTicks);
-  //   }
-  // }, [navChartData]);
+      const tickCount = 5;
+      const tickStep = (newMaxValue - newMinValue) / (tickCount - 1);
+      const newDynamicTicks = Array.from({ length: tickCount }, (_, i) =>
+        Math.round(newMinValue + tickStep * i)
+      );
+      setDynamicTicks(newDynamicTicks);
+    }
+  }, [navChartData]);
 
   useEffect(() => {
     if (navChartData) {
@@ -162,7 +111,7 @@ export default function TotalNavChart() {
       );
       setDynamicTicks(newDynamicTicks);
     }
-  }, []);
+  }, [navChartData]);
 
   const CustomTooltipCursor = (props: any) => {
     const { points, height, payload } = props;
@@ -231,10 +180,10 @@ export default function TotalNavChart() {
     return null;
   };
 
-  // if (isPending) return <Loader />;
-  // if (error) return <div>Error loading chart data: {error.message}</div>;
-  // if (!navChartData || navChartData.length === 0)
-  //   return <div>No chart data available</div>;
+  if (isPending) return <Loader />;
+  if (error) return <div>Error loading chart data: {error.message}</div>;
+  if (!navChartData || navChartData.length === 0)
+    return <div>No chart data available</div>;
 
   return (
     <ChartContainer

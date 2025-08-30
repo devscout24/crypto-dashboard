@@ -1,10 +1,10 @@
 import SelectInput, { type SelectOption } from "@/components/SelectInput";
 import TotalNavChart from "./TotalNavChart";
 import { useState } from "react";
-// import { useNavChartData } from "@/queries/cryptoQueries";
 import Loader from "@/components/Loader";
-// import type { TNavChartData } from "@/types";
 import { cn } from "@/lib/utils";
+import type { TNavChartData } from "@/types";
+import { useNavChartData } from "@/queries/cryptoQueries";
 
 const monthOptions: SelectOption[] = [
   { value: "january", label: "January" },
@@ -25,36 +25,25 @@ export default function TotalNavPanel() {
   const currentMonth = new Date().toLocaleString("default", { month: "long" });
   const [selected, setSelected] = useState<string>(currentMonth.toLowerCase());
 
-  // const {
-  //   data: navChartData,
-  //   isPending,
-  //   error,
-  // } = useNavChartData({
-  //   period: "30d",
-  // });
+  const { data: navChartData, isPending } = useNavChartData({
+    period: "30d",
+  });
 
-  // const totalNav = navChartData?.data.reduce(
-  //   (total: number, item: TNavChartData) => {
-  //     return total + item.endingNav;
-  //   },
-  //   0
-  // );
+  const totalNav = navChartData?.data.reduce(
+    (total: number, item: TNavChartData) => {
+      return total + item.endingNav;
+    },
+    0
+  );
 
-  // const totalGrowth = navChartData?.data.reduce(
-  //   (total: number, item: TNavChartData) => {
-  //     return total + item.growthPercent;
-  //   },
-  //   0
-  // );
+  const totalGrowth = navChartData?.data.reduce(
+    (total: number, item: TNavChartData) => {
+      return total + item.growthPercent;
+    },
+    0
+  );
 
-  // const isUp = totalGrowth > 0;
-
-  // mock data
-  const totalNav = 1000000;
-  const isPending = false;
-
-  const totalGrowth = 10;
-  const isUp = true;
+  const isUp = totalGrowth > 0;
 
   const handleMonthChange = (value: string) => {
     console.log("Selected month:", value);
@@ -62,9 +51,6 @@ export default function TotalNavPanel() {
   };
 
   if (isPending) return <Loader />;
-  // if (error) return <div>Error loading chart data: {error.message}</div>;
-  // if (!navChartData || navChartData.length === 0)
-  //   return <div>No chart data available</div>;
 
   return (
     <section className="section-container p-0">
