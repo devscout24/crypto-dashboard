@@ -73,6 +73,7 @@ export default function AssignUnassignToAllocation({
 
   // Apply changes
   const handleApplyChanges = async () => {
+    console.log({ userData });
     try {
       // Process additions
       await Promise.all(

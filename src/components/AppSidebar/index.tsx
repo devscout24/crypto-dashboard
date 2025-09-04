@@ -21,7 +21,7 @@ export default function AppSidebar({
   const { data } = useAllocations();
 
   const allocations =
-    data &&
+    data?.data &&
     data?.data.map((item: TAllocation) => ({
       title: item?.name,
       url: `/dashboard/allocations/${item.key.toLowerCase()}`,
