@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useCallback, useRef } from "react";
-import { io, Socket } from "socket.io-client";
+import type { Socket } from "socket.io-client";
+import sharedSocket from "@/lib/socket";
 
 // Types
 export interface SocketConfig {
@@ -47,10 +48,7 @@ export function useSocket<T = any>(
   const [loading, setLoading] = useState<boolean>(false);
 
   // Use ref to store the socket instance to avoid stale closures
-  const socketRef = useRef<Socket | null>(null);
-
-  // Memoize the socket URL and config to prevent unnecessary re-renders
-  const socketUrl = import.meta.env.VITE_APP_SOCKET_URL;
+  const socketRef = useRef<Socket | null>(sharedSocket);
 
   // const socketOptions = useRef({
   //   autoConnect: true,
@@ -119,32 +117,15 @@ export function useSocket<T = any>(
 
   // Initialize socket connection
   useEffect(() => {
-    if (!socketUrl) {
-      const errMsg =
-        "Socket URL must be provided in config or as REACT_APP_SOCKET_URL environment variable";
-      console.error(errMsg);
-      setError(errMsg);
-      setConnectionStatus("error");
-      return;
-    }
+    const socketInstance = sharedSocket;
 
-    setConnectionStatus("connecting");
+    setConnectionStatus(socketInstance.connected ? "connected" : "connecting");
 
-    // Create socket instance INSIDE useEffect
-    const socketInstance = io(socketUrl, {
-      transports: ["websocket", "polling"],
-      path: "/socket.io/",
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      timeout: 20000,
-    });
-    // const socketInstance = io(socketUrl, socketOptions.current);
-
-    socketRef.current = socketInstance;
+    // Keep local state in sync
     setSocket(socketInstance);
+    socketRef.current = socketInstance;
 
-    // Connection events
+    // Connection events (attach this hook’s specific listeners)
     socketInstance.on("connect", handleConnect);
     socketInstance.on("disconnect", handleDisconnect);
     socketInstance.on("connect_error", handleConnectError);
@@ -157,19 +138,18 @@ export function useSocket<T = any>(
       eventConfig.errorEvent || `${eventConfig.event}_error`;
     socketInstance.on(errorEventName, handleErrorEvent);
 
-    // Cleanup function
+    // Cleanup: remove only this hook’s listeners, do NOT disconnect shared socket
     return () => {
-      if (socketInstance) {
-        socketInstance.removeAllListeners();
-        socketInstance.disconnect();
-      }
-      setSocket(null);
-      socketRef.current = null;
-      setConnectionStatus("disconnected");
+      socketInstance.off("connect", handleConnect);
+      socketInstance.off("disconnect", handleDisconnect);
+      socketInstance.off("connect_error", handleConnectError);
+      socketInstance.off(eventConfig.event, handleDataEvent);
+      socketInstance.off(errorEventName, handleErrorEvent);
+
+      setConnectionStatus(socketInstance.connected ? "connected" : "disconnected");
       setLoading(false);
     };
   }, [
-    socketUrl,
     eventConfig.event,
     eventConfig.errorEvent,
     handleConnect,
@@ -192,9 +172,7 @@ export function useSocket<T = any>(
   }, []);
 
   const disconnect = useCallback(() => {
-    if (socketRef.current) {
-      socketRef.current.disconnect();
-    }
+    if (socketRef.current) socketRef.current.disconnect();
   }, []);
 
   const reconnect = useCallback(() => {
