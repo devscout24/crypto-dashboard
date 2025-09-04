@@ -40,26 +40,36 @@ function useSSEWithErrors<T>(event: string) {
 
 // Enhanced crypto nav history hook
 export function useCryptoNavHistory() {
-  return useSSEWithErrors<any[]>("crypto_nav_history");
+  return useSocket<any[]>({
+    event: "crypto_nav_history",
+    errorEvent: "crypto_nav_history_error",
+  });
 }
 
 // Enhanced crypto portfolio hook
 export function useCryptoPortfolio() {
-  return useSSEWithErrors("crypto_portfolio_latest");
+  return useSocket({
+    event: "crypto_portfolio_latest",
+    errorEvent: "crypto_portfolio_latest_error",
+  });
 }
 
 // Enhanced crypto asset performance hook
 export function useCryptoAssetPerformance() {
-  return useSSEWithErrors("crypto_asset_performance");
+  return useSocket({
+    event: "crypto_asset_performance",
+    errorEvent: "crypto_asset_performance_error",
+  });
 }
 
 // Enhanced crypto chart data hook with month support
 export function useCryptoChartData() {
-  const { addEventListener, isConnected } = useSSE();
-  const [data, setData] = useState<any[] | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState(true);
+  const hook = useSocket<any[]>({
+    event: "crypto_chart_data",
+    errorEvent: "crypto_chart_data_error",
+  });
 
+  // Auto-request current month data on connection
   useEffect(() => {
     if (!isConnected) return;
 
@@ -112,20 +122,32 @@ export function useCryptoChartData() {
 
 // Enhanced crypto system status hook
 export function useCryptoSystemStatus() {
-  return useSSEWithErrors("crypto_system_status");
+  return useSocket({
+    event: "crypto_system_status",
+    errorEvent: "crypto_system_status_error",
+  });
 }
 
 // Enhanced crypto current prices hook
 export function useCryptoCurrentPrices() {
-  return useSSEWithErrors("crypto_current_prices");
+  return useSocket({
+    event: "crypto_current_prices",
+    errorEvent: "crypto_current_prices_error",
+  });
 }
 
 // Enhanced crypto portfolio summary hook
 export function useCryptoPortfolioSummary() {
-  return useSSEWithErrors("crypto_portfolio_summary");
+  return useSocket({
+    event: "crypto_portfolio_summary",
+    errorEvent: "crypto_portfolio_summary_error",
+  });
 }
 
 // Enhanced crypto health check hook
 export function useCryptoHealthCheck() {
-  return useSSEWithErrors("crypto_health_check");
+  return useSocket({
+    event: "crypto_health_check",
+    errorEvent: "crypto_health_check_error",
+  });
 }
