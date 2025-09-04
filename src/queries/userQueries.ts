@@ -14,11 +14,12 @@ export const queryKeys = {
   },
   user_allocations: {
     all: ["user_allocations"] as const,
-    list: (params?: any) =>
-      [...queryKeys.user_allocations.all, "list", params] as const,
+    list: (userId: string, params?: any) =>
+      [...queryKeys.user_allocations.all, "list", userId, params] as const,
   },
 } as const;
 
+// Fetches single user
 export const useSingleUser = (id: string) => {
   return useQuery({
     queryKey: queryKeys.user.list(id),
@@ -26,6 +27,7 @@ export const useSingleUser = (id: string) => {
   });
 };
 
+// update user
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
 
@@ -41,6 +43,7 @@ export const useUpdateUser = () => {
   });
 };
 
+// delete user
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
 
@@ -56,6 +59,7 @@ export const useDeleteUser = () => {
   });
 };
 
+// fetches user profile
 export const useProfile = () => {
   const { token } = authStore();
 
@@ -66,6 +70,7 @@ export const useProfile = () => {
   });
 };
 
+// update profile
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
 
@@ -98,10 +103,10 @@ export const useAssignAllocation = () => {
 
   return useMutation({
     mutationFn: userApi.assignUserToAllocation,
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       toast.success(data.message || "Allocation assigned successfully!");
       queryClient.invalidateQueries({
-        queryKey: queryKeys.user_allocations.list(),
+        queryKey: queryKeys.user_allocations.list(variables.userId),
       });
     },
     onError: (error: any) => {
@@ -116,10 +121,10 @@ export const useUnassignAllocation = () => {
 
   return useMutation({
     mutationFn: userApi.unassignUserFromAllocation,
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       toast.success(data.message || "Allocation unassigned successfully!");
       queryClient.invalidateQueries({
-        queryKey: queryKeys.user_allocations.list(),
+        queryKey: queryKeys.user_allocations.list(variables.userId),
       });
     },
     onError: (error: any) => {
@@ -133,7 +138,7 @@ export const useUnassignAllocation = () => {
 // Fetches user allocations by user
 export const useUserAllocations = (userId: string) => {
   return useQuery({
-    queryKey: queryKeys.user_allocations.list(),
+    queryKey: queryKeys.user_allocations.list(userId),
     queryFn: () => userApi.getUserAllocations(userId),
   });
 };

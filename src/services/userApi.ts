@@ -1,6 +1,6 @@
 // crypto-dashboard/src/services/userApi.ts
 import { apiClient } from "@/api";
-import type { TUser } from "@/types";
+import type { GetUserAllocationsResponse, TUser, UserProfile } from "@/types";
 
 export const userApi = {
   getSingleUser: async (id: string) => {
@@ -18,7 +18,7 @@ export const userApi = {
     return response.data;
   },
 
-  getProfile: async () => {
+  getProfile: async (): Promise<UserProfile> => {
     const response = await apiClient.get("/auth/me");
     return response.data;
   },
@@ -61,7 +61,9 @@ export const userApi = {
   },
 
   // get allocations for a user
-  getUserAllocations: async (userId: string) => {
+  getUserAllocations: async (
+    userId: string
+  ): Promise<GetUserAllocationsResponse> => {
     const response = await apiClient.get(`/user-allocation/user/${userId}`);
     return response.data;
   },

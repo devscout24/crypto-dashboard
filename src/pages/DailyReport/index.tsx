@@ -1,9 +1,12 @@
 import { useTitleStore } from "@/stores/titleStore";
 import { useEffect } from "react";
 import DailyReportCard from "./components/DailyReportCard";
+import { useProfile } from "@/queries/userQueries";
 
 export default function DailyReportPage() {
   const { setTitle } = useTitleStore();
+  const { data: userData } = useProfile();
+  console.log({ userData });
 
   useEffect(() => {
     setTitle("Daily Report");

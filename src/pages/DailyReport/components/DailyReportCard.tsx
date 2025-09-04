@@ -37,16 +37,7 @@ export default function DailyReportCard() {
             growthValue = parseFloat(item.growthRate || "0");
           }
 
-          const noteLines = item.note.split("\n");
-          const reportTextIndex = noteLines.findIndex((line: string) =>
-            line.startsWith("- Daily Report Text:")
-          );
-          let description = item.note;
-          if (reportTextIndex !== -1) {
-            description = noteLines[reportTextIndex].substring(
-              "- Daily Report Text: ".length
-            );
-          }
+          const description = item.note;
 
           // Safe date parsing
           let dateStr = "Invalid Date";
@@ -146,7 +137,7 @@ export default function DailyReportCard() {
                   </div>
                 </div>
                 <AccordionContent className="bg-card text-card-foreground border-t rounded-b-lg py-4 px-10">
-                  <p>{report.description}</p>
+                  <p className="whitespace-pre-wrap">{report.description}</p>
                 </AccordionContent>
               </div>
             </AccordionItem>

@@ -11,7 +11,7 @@ export type TAllocation = {
   date: string;
   currentBalance: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 };
 
 export type TAllocationKeyData = {
