@@ -6,13 +6,28 @@ import type {
 import { Link } from "react-router";
 import { useEffect, useState } from "react";
 import { useReports } from "@/queries/cryptoQueries";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import DailyReportForm from "@/pages/DataForms/components/DailyReportForm";
 
-export default function DailyReport() {
+export default function DailyReport({
+  fromAdmin = false,
+}: {
+  fromAdmin?: boolean;
+}) {
   const [performanceReportCards, setPerformanceReportCards] = useState<
     TPerformanceReportCard[]
   >([]);
+  const [selectedReport, setSelectedReport] =
+    useState<TPerformanceReportApiResponse | null>(null);
 
   const { data } = useReports();
+  console.log({ data });
 
   useEffect(() => {
     if (data && data.data) {
@@ -58,6 +73,7 @@ export default function DailyReport() {
           }
 
           return {
+            id: item.id,
             date: dateStr,
             description,
             startingNAV: `$${parseFloat(item.starting).toLocaleString()}`,
@@ -77,6 +93,22 @@ export default function DailyReport() {
     }
   }, [data]);
 
+  const handleEditClick = (report: TPerformanceReportCard) => {
+    const originalReport = data?.data.find(
+      (item: TPerformanceReportApiResponse) => {
+        console.log({ item });
+        return (
+          new Date(item?.createdAt).toLocaleDateString("en-US") === report.date
+        );
+      }
+    );
+    setSelectedReport(originalReport || null);
+  };
+
+  const handleCloseEdit = () => {
+    setSelectedReport(null);
+  };
+
   return (
     <section className="section-container h-full">
       <div className="flex items-center justify-between">
@@ -86,25 +118,70 @@ export default function DailyReport() {
         </Link>
       </div>
       <div className="h-full overflow-y-auto">
-        {performanceReportCards.map((item, i) => (
-          <div
-            key={i}
-            className={`flex items-start justify-between py-2 ${
-              performanceReportCards.length - 1 === i ? "" : "border-b"
-            }`}
-          >
-            <p className="w-60 line-clamp-2 text-muted-foreground">
-              {item?.description}
-            </p>
-            <p
-              className={
-                item.growthRate.sign === "+" ? "text-green-500" : "text-red-500"
-              }
-            >
-              {item.growthRate.formatted}
-            </p>
-          </div>
-        ))}
+        {fromAdmin ? (
+          <>
+            {performanceReportCards.map((item, i) => (
+              <Dialog key={i}>
+                <DialogTrigger asChild>
+                  <div
+                    onClick={() => handleEditClick(item)}
+                    className={`flex items-start justify-between py-2 cursor-pointer ${
+                      performanceReportCards.length - 1 === i ? "" : "border-b"
+                    }`}
+                  >
+                    <p className="w-60 line-clamp-2 text-muted-foreground">
+                      {item?.description}
+                    </p>
+                    <p
+                      className={
+                        item.growthRate.sign === "+"
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }
+                    >
+                      {item.growthRate.formatted}
+                    </p>
+                  </div>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Edit Daily Report for {item.date}</DialogTitle>
+                  </DialogHeader>
+                  {selectedReport && (
+                    <DailyReportForm
+                      initialData={selectedReport}
+                      onSuccess={handleCloseEdit}
+                    />
+                  )}
+                </DialogContent>
+              </Dialog>
+            ))}
+          </>
+        ) : (
+          <>
+            {performanceReportCards.map((item, i) => (
+              <div
+                key={i}
+                className={`flex items-start justify-between py-2 ${
+                  performanceReportCards.length - 1 === i ? "" : "border-b"
+                }`}
+              >
+                <p className="w-60 line-clamp-2 text-muted-foreground">
+                  {item?.description}
+                </p>
+                <p
+                  className={
+                    item.growthRate.sign === "+"
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }
+                >
+                  {item.growthRate.formatted}
+                </p>
+              </div>
+            ))}
+          </>
+        )}
       </div>
     </section>
   );

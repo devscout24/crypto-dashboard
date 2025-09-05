@@ -12,6 +12,7 @@ export type TPerformanceReportCard = {
 };
 
 export type TPerformanceReportApiResponse = {
+  id: string;
   createdAt: string;
   note: string;
   starting: string;
