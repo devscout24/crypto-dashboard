@@ -14,6 +14,7 @@ export default function DailyReport({
 }: {
   fromAdmin?: boolean;
 }) {
+  const [openDialog, setOpenDialog] = useState(false);
   const [performanceReportCards, setPerformanceReportCards] = useState<
     TPerformanceReportCard[]
   >([]);
@@ -69,12 +70,13 @@ export default function DailyReport({
         {fromAdmin ? (
           <>
             {performanceReportCards.map((item, i) => (
-              <Dialog key={i}>
+              <Dialog key={i} open={openDialog} onOpenChange={setOpenDialog}>
                 <DialogTrigger asChild>
                   <div
                     className={`flex items-start justify-between py-2 cursor-pointer ${
                       performanceReportCards.length - 1 === i ? "" : "border-b"
                     }`}
+                    onClick={() => setOpenDialog(true)}
                   >
                     <p className="w-60 line-clamp-2 text-muted-foreground">
                       {item?.description}
@@ -91,7 +93,10 @@ export default function DailyReport({
                   </div>
                 </DialogTrigger>
                 <DialogContent className="">
-                  <DailyReportForm reportId={item?.id} />
+                  <DailyReportForm
+                    reportId={item?.id}
+                    closeModal={() => setOpenDialog(false)}
+                  />
                 </DialogContent>
               </Dialog>
             ))}

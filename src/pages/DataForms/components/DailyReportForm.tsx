@@ -12,11 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import DatePicker from "@/components/DatePicker";
-import {
-  useCreateReport,
-  useReportById,
-  useUpdateReport,
-} from "@/queries/cryptoQueries";
+import { useReportById, useUpdateReport } from "@/queries/cryptoQueries";
 import { useEffect } from "react";
 import type { TDailyReportPayload } from "@/types";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -35,9 +31,13 @@ const dailyReportSchema = z.object({
 
 type DailyReportFormProps = {
   reportId?: string;
+  closeModal?: () => void;
 };
 
-export default function DailyReportForm({ reportId }: DailyReportFormProps) {
+export default function DailyReportForm({
+  reportId,
+  closeModal,
+}: DailyReportFormProps) {
   const form = useForm<z.infer<typeof dailyReportSchema>>({
     resolver: zodResolver(dailyReportSchema),
     defaultValues: {
@@ -55,7 +55,6 @@ export default function DailyReportForm({ reportId }: DailyReportFormProps) {
 
   // Only fetch by date if no initialData is provided and reportDate exists
   const { data: reportData } = useReportById(reportId ? reportId : "");
-  const { mutate: createReport, isPending: isCreating } = useCreateReport();
   const { mutate: updateReport, isPending: isUpdating } = useUpdateReport();
 
   // Handle form reset when initialData or reportData changes
@@ -78,26 +77,12 @@ export default function DailyReportForm({ reportId }: DailyReportFormProps) {
 
       // Extract headline and subheadline from note
       const noteLines = dataToUse.note?.split("\n") || [];
-      const reportTextIndex = noteLines.findIndex((line: string) =>
-        line.startsWith("- Daily Report Text:")
-      );
-      let headline = "";
-      let subheadline = "";
-      if (reportTextIndex !== -1) {
-        headline = noteLines[reportTextIndex].substring(
-          "- Daily Report Text: ".length
-        );
-        subheadline =
-          noteLines.slice(0, reportTextIndex).join("\n") || headline;
-      } else {
-        headline = dataToUse.note || "";
-        subheadline = dataToUse.note || "";
-      }
+      console.log({ noteLines });
 
       form.reset({
         date: formattedDate,
-        headline,
-        subheadline,
+        headline: noteLines[0],
+        subheadline: noteLines[1],
         starting_nav: parseFloat(dataToUse.starting || "0"),
         capital_in: parseFloat(dataToUse.capital_in || "0"),
         capital_out: parseFloat(dataToUse.capital_out || "0"),
@@ -123,28 +108,18 @@ export default function DailyReportForm({ reportId }: DailyReportFormProps) {
       daily_growth_rate: values.daily_growth_rate,
     };
 
-    // Determine if this is an update or create operation
-    const isUpdate = reportId || reportData?.data?.id;
-
-    if (isUpdate && reportId) {
+    if (reportId) {
       updateReport(
         { id: reportId, data: payload },
         {
           onSuccess: () => {
             form.reset();
+            closeModal?.();
           },
         }
       );
-    } else {
-      createReport(payload, {
-        onSuccess: () => {
-          form.reset();
-        },
-      });
     }
   }
-
-  const isEditing = !!reportData?.data;
 
   return (
     <>
@@ -182,7 +157,10 @@ export default function DailyReportForm({ reportId }: DailyReportFormProps) {
                 <FormItem>
                   <FormLabel>Headline</FormLabel>
                   <FormControl>
-                    <Textarea {...field} className="w-full h-28 resize-none" />
+                    <Textarea
+                      {...field}
+                      className="w-full max-h-28 resize-none"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -196,7 +174,10 @@ export default function DailyReportForm({ reportId }: DailyReportFormProps) {
                 <FormItem>
                   <FormLabel>Subheadline</FormLabel>
                   <FormControl>
-                    <Textarea {...field} className="w-full h-28 resize-none" />
+                    <Textarea
+                      {...field}
+                      className="w-full max-h-28 resize-none"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -333,16 +314,8 @@ export default function DailyReportForm({ reportId }: DailyReportFormProps) {
               )}
             />
 
-            <Button
-              type="submit"
-              disabled={isCreating || isUpdating}
-              className="w-full"
-            >
-              {isCreating || isUpdating
-                ? "Submitting..."
-                : isEditing
-                ? "Update Daily Report"
-                : "Create Daily Report"}
+            <Button type="submit" disabled={isUpdating} className="w-full">
+              {isUpdating ? "Submitting..." : "Update Daily Report"}
             </Button>
           </form>
         </FormProvider>
