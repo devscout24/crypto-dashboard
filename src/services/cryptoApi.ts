@@ -83,8 +83,8 @@ export const cryptoApi = {
   },
 
   // Get daily report by date
-  getReportByDate: async (date: string) => {
-    const response = await apiClient.get(`/daily-report/${date}`);
+  getReportById: async (id: string) => {
+    const response = await apiClient.get(`/daily-report/${id}`);
     return response.data;
   },
 

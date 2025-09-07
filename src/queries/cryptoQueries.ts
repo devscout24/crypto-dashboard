@@ -137,11 +137,11 @@ export const useReports = () => {
 };
 
 // Fetches a single report by date
-export const useReportByDate = (date: string) => {
+export const useReportById = (id: string) => {
   return useQuery({
-    queryKey: [...cryptoQueryKeys.dailyReport, date],
-    queryFn: () => cryptoApi.getReportByDate(date),
-    enabled: !!date,
+    queryKey: [...cryptoQueryKeys.dailyReport, id],
+    queryFn: () => cryptoApi.getReportById(id),
+    enabled: !!id,
   });
 };
 

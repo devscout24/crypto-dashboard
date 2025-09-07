@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import DatePicker from "@/components/DatePicker";
 import {
   useCreateReport,
-  useReportByDate,
+  useReportById,
   useUpdateReport,
 } from "@/queries/cryptoQueries";
 import { useEffect } from "react";
@@ -62,7 +62,7 @@ export default function DailyReportForm({
   });
 
   // Only fetch by date if no initialData is provided and reportDate exists
-  const { data: reportData } = useReportByDate(
+  const { data: reportData } = useReportById(
     !initialData && reportDate ? reportDate : ""
   );
   const { mutate: createReport, isPending: isCreating } = useCreateReport();
