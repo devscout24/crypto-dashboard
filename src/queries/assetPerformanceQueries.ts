@@ -35,3 +35,24 @@ export const useCreateAssetPerformance = () => {
     },
   });
 };
+
+// update asset performance
+export const useUpdateAssetPerformance = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: assetPerformanceApi.updateAssetPerformance,
+    onSuccess: (data) => {
+      toast.success(data?.message || "Asset Performance updated successfully!");
+      queryClient.invalidateQueries({
+        queryKey: assetPerformanceQueryKeys.assetPerformance,
+      });
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || "Asset Performance Update failed"
+      );
+    },
+  });
+};

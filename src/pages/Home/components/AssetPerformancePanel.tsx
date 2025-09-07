@@ -90,7 +90,7 @@ export default function AssetPerformancePanel(): React.ReactNode {
       accessorKey: "close",
       header: "Close",
       enableHiding: true,
-      cell: ({ row }) => <p>{`+${row.original.close}%`}</p>,
+      cell: ({ row }) => <p>{`+${row.original.close}`}</p>,
     },
     {
       accessorKey: "change",
