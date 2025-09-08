@@ -2,11 +2,9 @@ import { apiClient } from "@/api";
 import type { TAssetPerformancePayload } from "@/types";
 
 export const assetPerformanceApi = {
-  //  Get asset performance data for the given minutes
-  getAssetPerformance: async (minutes: number) => {
-    const response = await apiClient.get(
-      `/asset-performance/?minutes=${minutes}`
-    );
+  //  Get latest asset performance data
+  getAssetPerformance: async () => {
+    const response = await apiClient.get("/asset-performance/latest");
     return response.data;
   },
 

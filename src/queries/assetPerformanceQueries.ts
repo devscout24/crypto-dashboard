@@ -7,11 +7,11 @@ export const assetPerformanceQueryKeys = {
   assetPerformance: ["assetPerformance"] as const,
 } as const;
 
-// Fetches the assetPerformance data for the given minutes.
-export const useAssetPerformanceData = (minutes: number) => {
+// Fetches latest the assetPerformance data
+export const useAssetPerformanceData = () => {
   return useQuery({
     queryKey: assetPerformanceQueryKeys.assetPerformance,
-    queryFn: () => assetPerformanceApi.getAssetPerformance(minutes),
+    queryFn: () => assetPerformanceApi.getAssetPerformance(),
   });
 };
 

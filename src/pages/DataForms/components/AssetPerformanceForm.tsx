@@ -11,18 +11,23 @@ import {
   FormMessage,
   FormField,
 } from "@/components/ui/form";
+import type { TCoinData } from "@/types";
 
 const dailyReportSchema = z.object({
   closePrice: z.number().min(0, "Starting NAV must be a positive number"),
   changePercent: z.number().min(0, "Ending NAV must be a positive number"),
 });
 
-export default function AssetPerformanceForm() {
+export default function AssetPerformanceForm({
+  selectedRowToEdit,
+}: {
+  selectedRowToEdit: TCoinData;
+}) {
   const form = useForm<z.infer<typeof dailyReportSchema>>({
     resolver: zodResolver(dailyReportSchema),
     defaultValues: {
-      closePrice: 0,
-      changePercent: 0,
+      closePrice: selectedRowToEdit?.close || 0,
+      changePercent: selectedRowToEdit?.change || 0,
     },
   });
 
@@ -33,21 +38,14 @@ export default function AssetPerformanceForm() {
 
   return (
     <FormProvider {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4 bg-card p-4 rounded-lg"
-      >
-        <h2 className="text-xl font-semibold mb-4">
-          Update Asset Performance Panel
-        </h2>
-
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4  p-4">
         {/* Close Price */}
         <FormField
           control={form.control}
           name="closePrice"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Starting NAV</FormLabel>
+              <FormLabel>Close Price</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -66,7 +64,7 @@ export default function AssetPerformanceForm() {
           name="changePercent"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Starting NAV</FormLabel>
+              <FormLabel>Change Percent</FormLabel>
               <FormControl>
                 <Input
                   type="number"

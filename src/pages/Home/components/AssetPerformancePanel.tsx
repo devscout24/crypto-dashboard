@@ -1,7 +1,7 @@
 import { DataTable } from "@/components/DataTable/dataTable";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Pencil } from "lucide-react";
 import { useState } from "react";
 import { useAssetPerformanceData } from "@/queries/assetPerformanceQueries";
 
@@ -13,6 +13,9 @@ import D from "@/assets/icons/coins/Group (3).png";
 import Synthetix from "@/assets/icons/coins/Synthetix Network SNX.png";
 import TrueUSD from "@/assets/icons/coins/TrueUSD TUSD.png";
 import type { TAssetPerformanceResponse, TCoinData } from "@/types";
+import { Button } from "@/components/ui/button";
+import { DialogWrapper } from "@/components/DialogWrapper";
+import AssetPerformanceForm from "@/pages/DataForms/components/AssetPerformanceForm";
 
 const coinImages: { [key: string]: string } = {
   ETH,
@@ -23,43 +26,48 @@ const coinImages: { [key: string]: string } = {
   SUSD: Synthetix,
 };
 
-export default function AssetPerformancePanel(): React.ReactNode {
+export default function AssetPerformancePanel({
+  fromAdmin = false,
+}: {
+  fromAdmin?: boolean;
+}) {
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(15);
+  const [isEditingAssetPerformance, setIsEditingAssetPerformance] =
+    useState(false);
+  const [selectedRowToEdit, setSelectedRowToEdit] = useState<TCoinData>({
+    image: "",
+    name: "",
+    symbol: "",
+    open: 0,
+    close: 0,
+    change: 0,
+    volume: 0,
+    volumeTrend: "up",
+  });
 
-  const { data: assetPerformanceData, isPending } =
-    useAssetPerformanceData(120);
+  const { data: assetPerformanceData, isPending } = useAssetPerformanceData();
 
-  const latestAssets: { [key: string]: TAssetPerformanceResponse } = {};
-
-  assetPerformanceData?.data?.forEach((perf: TAssetPerformanceResponse) => {
-    if (
-      !latestAssets[perf.symbol] ||
-      new Date(perf.datetime) > new Date(latestAssets[perf.symbol].datetime)
-    ) {
-      latestAssets[perf.symbol] = perf;
+  const formattedAssetPerformance = assetPerformanceData?.data.map(
+    (item: TAssetPerformanceResponse) => {
+      return {
+        image: coinImages[item?.symbol],
+        name: item?.symbol,
+        symbol: item?.symbol,
+        open: item?.open,
+        close: item?.close,
+        change: item?.change_percent,
+        volume: item?.volume_usd,
+        volumeTrend:
+          item?.change_percent >= 0 ? ("up" as const) : ("down" as const),
+      };
     }
-  });
-
-  const formattedAssetPerformance = Object.keys(latestAssets).map((key) => {
-    const coin = latestAssets[key];
-    return {
-      image: coinImages[key],
-      name: key,
-      symbol: coin.symbol,
-      open: coin.open,
-      close: coin.close,
-      change: coin.change_percent,
-      volume: coin.volume_usd,
-      volumeTrend:
-        coin.change_percent >= 0 ? ("up" as const) : ("down" as const),
-    };
-  });
+  );
 
   const columns: ColumnDef<TCoinData>[] = [
     {
       accessorKey: "name",
-      header: "Name",
+      header: "Coin",
       enableHiding: true,
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
@@ -77,26 +85,28 @@ export default function AssetPerformancePanel(): React.ReactNode {
       header: "",
       enableHiding: true,
       cell: ({ row }) => (
-        <p className="text-muted-foreground">{row.original.symbol}</p>
+        <div className="flex items-center gap-2">
+          <p>{row.original.symbol}</p>
+        </div>
       ),
     },
     {
       accessorKey: "open",
       header: "Open",
       enableHiding: true,
-      cell: ({ row }) => <p>{`+${row.original.open}`}</p>,
+      cell: ({ row }) => <p>{`+${row.original.open}$`}</p>,
     },
     {
       accessorKey: "close",
       header: "Close",
       enableHiding: true,
-      cell: ({ row }) => <p>{`+${row.original.close}`}</p>,
+      cell: ({ row }) => <p>{`+${row.original.close}$`}</p>,
     },
     {
       accessorKey: "change",
       header: "Change",
       enableHiding: true,
-      cell: ({ row }) => <p>{`+${row.original.change}`}</p>,
+      cell: ({ row }) => <p>{`+${row.original.change}%`}</p>,
     },
     {
       accessorKey: "volume",
@@ -120,6 +130,30 @@ export default function AssetPerformancePanel(): React.ReactNode {
         </div>
       ),
     },
+    ...(fromAdmin
+      ? [
+          {
+            id: "actions",
+            header: "Actions",
+            enableHiding: false,
+            cell: ({ row }: { row: { original: TCoinData } }) => (
+              <div className="flex items-center justify-center gap-2">
+                <Button
+                  variant={"outline"}
+                  className=""
+                  onClick={() => {
+                    setIsEditingAssetPerformance(true);
+                    setSelectedRowToEdit(row.original);
+                  }}
+                  title="Edit"
+                >
+                  <Pencil size={16} />
+                </Button>
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -132,12 +166,21 @@ export default function AssetPerformancePanel(): React.ReactNode {
           isLoading={isPending}
           page={page}
           limit={limit}
-          total={Object.keys(latestAssets).length}
+          total={formattedAssetPerformance?.length}
           onPageChange={setPage}
           onLimitChange={setLimit}
           isPagination={false}
         />
       </div>
+
+      {/* edit asset performance dialog */}
+      <DialogWrapper
+        isOpen={isEditingAssetPerformance}
+        onOpenChange={setIsEditingAssetPerformance}
+        title="Edit Asset Performance"
+      >
+        <AssetPerformanceForm selectedRowToEdit={selectedRowToEdit} />
+      </DialogWrapper>
     </section>
   );
 }

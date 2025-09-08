@@ -8,12 +8,9 @@ import SystemStatus from "@/pages/Home/components/SystemStatus";
 import TotalNavForm from "./components/TotalNavForm";
 import SystemStatusForm from "./components/SystemStatusForm";
 import DailyReport from "../Home/components/DailyReport";
-import AssetPerformanceForm from "./components/AssetPerformanceForm";
 
 export default function DataForms() {
   const [isEditingTotalNav, setIsEditingTotalNav] = useState(false);
-  const [isEditingAssetPerformance, setIsEditingAssetPerformance] =
-    useState(false);
   const [isEditingSystemStatus, setIsEditingSystemStatus] = useState(false);
 
   return (
@@ -53,30 +50,9 @@ export default function DataForms() {
             <div className="w-full md:w-[75%]">
               <div className="mb-2 flex justify-between items-center">
                 <h3>Asset Performance Management</h3>
-                <Button
-                  variant={"outline"}
-                  onClick={() =>
-                    setIsEditingAssetPerformance(!isEditingAssetPerformance)
-                  }
-                >
-                  {isEditingAssetPerformance ? (
-                    <>
-                      <X className="h-4 w-4 mr-1" />
-                      Cancel
-                    </>
-                  ) : (
-                    <>
-                      <Pen className="h-4 w-4 mr-1" />
-                      Edit
-                    </>
-                  )}
-                </Button>
               </div>
-              {isEditingAssetPerformance ? (
-                <AssetPerformanceForm />
-              ) : (
-                <AssetPerformancePanel />
-              )}
+
+              <AssetPerformancePanel fromAdmin />
             </div>
 
             {/* Daily Report Management */}

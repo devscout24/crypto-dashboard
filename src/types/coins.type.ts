@@ -24,5 +24,4 @@ export type TAssetPerformanceResponse = {
   close: number;
   change_percent: number;
   volume_usd: number;
-  datetime: string;
 };
