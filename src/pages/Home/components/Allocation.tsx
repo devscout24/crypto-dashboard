@@ -31,7 +31,6 @@ export default function Allocation({
   // Calculate gainPercent
   let gainPercent = 0;
   if (data?.data?.history && data.data.history.length > 0) {
-    // Sort by createdAt to ensure correct order
     const sortedHistory = [...data.data.history].sort(
       (a, b) =>
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -100,7 +99,6 @@ export default function Allocation({
       </div>
 
       <AllocationAreaChart
-        // chartData={chartData}
         chartData={formattedData || []}
         chartConfig={chartConfig}
         idSuffix={label}

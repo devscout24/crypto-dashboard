@@ -10,6 +10,8 @@ export type TAllocation = {
   key: string;
   date: string;
   currentBalance: number;
+  endingBalance: number;
+  type: string;
   createdAt: string;
   updatedAt?: string;
 };
@@ -34,4 +36,6 @@ export type TAllocationPayload = {
   key: string;
   name: string;
   initialBalance: number;
+  endingBalance: number;
+  type: string;
 };

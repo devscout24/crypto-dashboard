@@ -26,3 +26,10 @@ export const allocationOptions: { value: string; label: string }[] = [
   { value: "Y", label: "Allocation Y" },
   { value: "Z", label: "Allocation Z" },
 ];
+
+export const allocationTypes = [
+  { label: "Bitcoin", value: "BTC" },
+  { label: "Ethereum", value: "ETH" },
+  { label: "Stablecoin", value: "STABLE" },
+  { label: "Other", value: "OTHER" },
+];

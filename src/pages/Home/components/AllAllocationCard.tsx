@@ -41,7 +41,9 @@ export default function AllAllocationCard() {
   return (
     <div>
       {allocationData?.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div
+          className={`grid grid-cols-1 md:grid-cols-${allocationData?.length} gap-4`}
+        >
           {allocationData.map((item: AllocationData) => (
             <Link
               to={`/dashboard/allocations/${item?.label.toLowerCase()}`}

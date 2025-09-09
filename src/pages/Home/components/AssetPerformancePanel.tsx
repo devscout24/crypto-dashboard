@@ -48,8 +48,9 @@ export default function AssetPerformancePanel({
 
   const { data: assetPerformanceData, isPending } = useAssetPerformanceData();
 
-  const formattedAssetPerformance = assetPerformanceData?.data.map(
-    (item: TAssetPerformanceResponse) => {
+  const formattedAssetPerformance =
+    assetPerformanceData?.data &&
+    assetPerformanceData?.data.map((item: TAssetPerformanceResponse) => {
       return {
         image: coinImages[item?.symbol],
         name: item?.symbol,
@@ -61,8 +62,7 @@ export default function AssetPerformancePanel({
         volumeTrend:
           item?.change_percent >= 0 ? ("up" as const) : ("down" as const),
       };
-    }
-  );
+    });
 
   const columns: ColumnDef<TCoinData>[] = [
     {
@@ -161,7 +161,7 @@ export default function AssetPerformancePanel({
       <h3 className="font-bold">Asset Performance Panel</h3>
       <div>
         <DataTable<TCoinData>
-          data={formattedAssetPerformance}
+          data={formattedAssetPerformance || []}
           columns={columns}
           isLoading={isPending}
           page={page}
