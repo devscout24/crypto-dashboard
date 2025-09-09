@@ -15,6 +15,14 @@ export const useAssetPerformanceData = () => {
   });
 };
 
+// fetches asset performance platforms data by id
+export const useAssetPlatformsById = (id: string) => {
+  return useQuery({
+    queryKey: assetPerformanceQueryKeys.assetPerformance,
+    queryFn: () => assetPerformanceApi.getAssetPlatformsById(id),
+  });
+};
+
 // Creates a new assetPerformance.
 export const useCreateAssetPerformance = () => {
   const queryClient = useQueryClient();

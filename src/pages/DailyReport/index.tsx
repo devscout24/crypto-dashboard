@@ -17,9 +17,9 @@ export default function DailyReportPage() {
     // asd
     <section className="section-container">
       <div className="w-full">
-        <p className="justify-start text-muted-foreground text-sm font-medium font-Inter ">
+        <h3 className="justify-start text-muted-foreground text-lg font-medium font-Inter ">
           Comprehensive daily performance analysis and market commentary
-        </p>
+        </h3>
       </div>
       <DailyReportCard />
     </section>

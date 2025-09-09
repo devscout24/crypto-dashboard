@@ -16,7 +16,7 @@ export const cryptoQueryKeys = {
 
 // Fetches the chart data for the given period.
 export const useNavChartData = (params?: {
-  period?: string;
+  month?: number;
   limit?: number;
 }) => {
   return useQuery({
@@ -112,6 +112,14 @@ export const useAllocationByKey = (key: string) => {
   return useQuery({
     queryKey: cryptoQueryKeys.chartData(key),
     queryFn: () => cryptoApi.getAllocationByKey(key),
+  });
+};
+
+// fetches the alloation data for the given limit
+export const useAllocationByLimit = (key: string, limit: number) => {
+  return useQuery({
+    queryKey: cryptoQueryKeys.chartData({ key, limit }),
+    queryFn: () => cryptoApi.getAllocationByLimit(key, limit),
   });
 };
 

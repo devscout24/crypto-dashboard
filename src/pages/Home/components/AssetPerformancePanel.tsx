@@ -48,21 +48,29 @@ export default function AssetPerformancePanel({
 
   const { data: assetPerformanceData, isPending } = useAssetPerformanceData();
 
+  const stablecoin: TAssetPerformanceResponse = assetPerformanceData?.data.find(
+    (item: TAssetPerformanceResponse) => item.symbol === "Stablecoin"
+  );
+
   const formattedAssetPerformance =
     assetPerformanceData?.data &&
-    assetPerformanceData?.data.map((item: TAssetPerformanceResponse) => {
-      return {
-        image: coinImages[item?.symbol],
-        name: item?.symbol,
-        symbol: item?.symbol,
-        open: item?.open,
-        close: item?.close,
-        change: item?.change_percent,
-        volume: item?.volume_usd,
-        volumeTrend:
-          item?.change_percent >= 0 ? ("up" as const) : ("down" as const),
-      };
-    });
+    assetPerformanceData?.data
+      ?.filter(
+        (item: TAssetPerformanceResponse) => item.symbol !== "Stablecoin"
+      )
+      .map((item: TAssetPerformanceResponse) => {
+        return {
+          image: coinImages[item?.symbol],
+          name: item?.symbol,
+          symbol: item?.symbol,
+          open: item?.open,
+          close: item?.close,
+          change: item?.change_percent,
+          volume: item?.volume_usd,
+          volumeTrend:
+            item?.change_percent >= 0 ? ("up" as const) : ("down" as const),
+        };
+      });
 
   const columns: ColumnDef<TCoinData>[] = [
     {
@@ -172,6 +180,24 @@ export default function AssetPerformancePanel({
           isPagination={false}
         />
       </div>
+
+      {/* Stablecoin Yield Matrix */}
+      {stablecoin && (
+        <div className="rounded-2xl border p-4 shadow-sm">
+          <h4 className="font-semibold mb-2">Stablecoin Yield Matrix</h4>
+          <p className="text-sm mb-3">
+            Current Yield:{" "}
+            <span className="font-bold text-green-600">
+              +{stablecoin.change_percent}%
+            </span>
+          </p>
+          <ul className="list-disc pl-5 text-sm space-y-1">
+            <li>USDC → Clearpool</li>
+            <li>USDT → Maple Prime</li>
+            <li>DAI → Frax Treasury Optimizer</li>
+          </ul>
+        </div>
+      )}
 
       {/* edit asset performance dialog */}
       <DialogWrapper

@@ -1,9 +1,9 @@
 import SelectInput, { type SelectOption } from "@/components/SelectInput";
 import TotalNavChart from "./TotalNavChart";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { TNavChartData } from "@/types";
 import { cn } from "@/lib/utils";
-import { useCryptoChartData } from "@/pages/hooks";
+import { useNavChartData } from "@/queries/cryptoQueries";
 
 const monthOptions: SelectOption[] = [
   { value: "january", label: "January" },
@@ -24,37 +24,30 @@ export default function TotalNavPanel() {
   const currentMonth = new Date().toLocaleString("default", { month: "long" });
   const [selected, setSelected] = useState<string>(currentMonth.toLowerCase());
 
-  const {
-    data: navChartData,
-    // loading: navLoading,
-    // error: navError,
-    isConnected,
-    emit,
-  } = useCryptoChartData();
-  // console.log({ navChartData });
+  const { data: navChartData } = useNavChartData();
 
-  const activeMonth = selected || currentMonth;
+  // const activeMonth = selected || currentMonth;
 
   // Request data when month changes or component mounts
-  useEffect(() => {
-    if (isConnected) {
-      const requestData = {
-        month: activeMonth,
-        year: new Date().getFullYear(),
-      };
+  // useEffect(() => {
+  //   if (isConnected) {
+  //     const requestData = {
+  //       month: activeMonth,
+  //       year: new Date().getFullYear(),
+  //     };
 
-      console.log("Requesting chart data for:", requestData);
-      emit("request_chart_data", requestData);
-    }
-  }, [activeMonth, isConnected, emit]);
+  //     console.log("Requesting chart data for:", requestData);
+  //     emit("request_chart_data", requestData);
+  //   }
+  // }, [activeMonth, isConnected, emit]);
 
   const totalNav =
-    navChartData &&
-    navChartData.reduce((total: number, item: TNavChartData) => {
+    navChartData?.data &&
+    navChartData?.data.reduce((total: number, item: TNavChartData) => {
       return total + item?.nav;
     }, 0);
 
-  const lastTwo = navChartData && navChartData?.slice(-2);
+  const lastTwo = navChartData?.data && navChartData?.data.slice(-2);
 
   const lastTwoNavDiff =
     lastTwo &&

@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import AllocationAreaChart from "./AllocationAreaChart";
 import { type ChartConfig } from "@/components/ui/chart";
-import { useAllocationByKey } from "@/queries/cryptoQueries";
+import { useAllocationByLimit } from "@/queries/cryptoQueries";
 import type { TAllocationHistory } from "@/types";
 
 type AllocationProps = {
@@ -15,7 +15,7 @@ export default function Allocation({
   chartConfig,
   allocationKey,
 }: AllocationProps) {
-  const { data } = useAllocationByKey(allocationKey);
+  const { data } = useAllocationByLimit(allocationKey, 50);
 
   const formattedData =
     data?.data?.history &&

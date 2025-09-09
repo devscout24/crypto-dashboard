@@ -8,6 +8,12 @@ export const assetPerformanceApi = {
     return response.data;
   },
 
+  // get asset performance platforms by id
+  getAssetPlatformsById: async (id: string) => {
+    const response = await apiClient.get(`/asset-performance/${id}/platforms`);
+    return response.data;
+  },
+
   //  Create a New asset performance
   createAssetPerformance: async (data: TAssetPerformancePayload) => {
     const response = await apiClient.post("/asset-performance", data);

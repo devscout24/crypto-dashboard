@@ -7,7 +7,7 @@ import type {
 
 export const cryptoApi = {
   //  Gets the chart data for the given period.
-  getNavChartData: async (params?: { period?: string; limit?: number }) => {
+  getNavChartData: async (params?: { month?: number; limit?: number }) => {
     const response = await apiClient.get("/crypto/chart-data", {
       params,
     });
@@ -61,6 +61,14 @@ export const cryptoApi = {
   // Gets the allocation data for the given key
   getAllocationByKey: async (key: string) => {
     const response = await apiClient.get(`/allocation/${key}`);
+    return response.data;
+  },
+
+  // Get the allocation data for the given limit
+  getAllocationByLimit: async (key: string, limit: number) => {
+    const response = await apiClient.get(`/allocation/${key}/history`, {
+      params: { limit },
+    });
     return response.data;
   },
 
