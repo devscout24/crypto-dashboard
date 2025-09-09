@@ -82,7 +82,7 @@ export function useSocket<T = any>(
   // Data event handler - memoized with stable reference
   const handleDataEvent = useCallback(
     (responseData: any) => {
-      console.log(`${eventConfig.event}:`, responseData);
+      // console.log(`${eventConfig.event}:`, responseData);
       setLoading(false);
 
       if (eventConfig.onData) {
@@ -146,7 +146,9 @@ export function useSocket<T = any>(
       socketInstance.off(eventConfig.event, handleDataEvent);
       socketInstance.off(errorEventName, handleErrorEvent);
 
-      setConnectionStatus(socketInstance.connected ? "connected" : "disconnected");
+      setConnectionStatus(
+        socketInstance.connected ? "connected" : "disconnected"
+      );
       setLoading(false);
     };
   }, [

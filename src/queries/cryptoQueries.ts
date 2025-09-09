@@ -15,7 +15,10 @@ export const cryptoQueryKeys = {
 } as const;
 
 // Fetches the chart data for the given period.
-export const useNavChartData = (params?: { period?: string }) => {
+export const useNavChartData = (params?: {
+  period?: string;
+  limit?: number;
+}) => {
   return useQuery({
     queryKey: cryptoQueryKeys.chartData(params),
     queryFn: () => cryptoApi.getNavChartData(params),

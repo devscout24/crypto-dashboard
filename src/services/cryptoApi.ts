@@ -7,7 +7,7 @@ import type {
 
 export const cryptoApi = {
   //  Gets the chart data for the given period.
-  getNavChartData: async (params?: { period?: string }) => {
+  getNavChartData: async (params?: { period?: string; limit?: number }) => {
     const response = await apiClient.get("/crypto/chart-data", {
       params,
     });
