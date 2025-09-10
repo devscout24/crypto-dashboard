@@ -1,9 +1,12 @@
 import { DataTable } from "@/components/DataTable/dataTable";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+// import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, Pencil } from "lucide-react";
 import { useState } from "react";
-import { useAssetPerformanceData } from "@/queries/assetPerformanceQueries";
+import {
+  useAssetPerformanceData,
+  useAssetPlatformsById,
+} from "@/queries/assetPerformanceQueries";
 
 // coins images
 import ETH from "@/assets/icons/coins/Ethereum ETH.png";
@@ -12,7 +15,7 @@ import T from "@/assets/icons/coins/Group (2).png";
 import D from "@/assets/icons/coins/Group (3).png";
 import Synthetix from "@/assets/icons/coins/Synthetix Network SNX.png";
 import TrueUSD from "@/assets/icons/coins/TrueUSD TUSD.png";
-import type { TAssetPerformanceResponse, TCoinData } from "@/types";
+import type { TAssetPerformance, TCoinData, TPlatform } from "@/types";
 import { Button } from "@/components/ui/button";
 import { DialogWrapper } from "@/components/DialogWrapper";
 import AssetPerformanceForm from "@/pages/DataForms/components/AssetPerformanceForm";
@@ -48,20 +51,34 @@ export default function AssetPerformancePanel({
 
   const { data: assetPerformanceData, isPending } = useAssetPerformanceData();
 
-  const stablecoin: TAssetPerformanceResponse = assetPerformanceData?.data.find(
-    (item: TAssetPerformanceResponse) => item.symbol === "Stablecoin"
+  const stablecoin = assetPerformanceData?.data.find(
+    (item: TAssetPerformance) => item.symbol === "Stablecoin"
   );
+
+  const { data: assetPerformancePlatforms } = useAssetPlatformsById(
+    stablecoin?.id || ""
+  );
+
+  const stablecoinPlatforms =
+    assetPerformancePlatforms?.data.map((platform: TPlatform) => ({
+      image: coinImages[platform.symbol] || "",
+      name: platform.name,
+      symbol: platform.symbol,
+      open: platform?.open || 0,
+      close: platform?.close || 0,
+      change: platform?.changePercent || 0,
+      volume: platform?.changePercent || 0,
+      volumeTrend: (platform?.changePercent || 0) >= 0 ? "up" : "down",
+    })) || [];
 
   const formattedAssetPerformance =
     assetPerformanceData?.data &&
     assetPerformanceData?.data
-      ?.filter(
-        (item: TAssetPerformanceResponse) => item.symbol !== "Stablecoin"
-      )
-      .map((item: TAssetPerformanceResponse) => {
+      ?.filter((item: TAssetPerformance) => item.symbol !== "Stablecoin")
+      .map((item: TAssetPerformance) => {
         return {
           image: coinImages[item?.symbol],
-          name: item?.symbol,
+          name: item?.name,
           symbol: item?.symbol,
           open: item?.open,
           close: item?.close,
@@ -72,6 +89,12 @@ export default function AssetPerformancePanel({
         };
       });
 
+  // Combine non-stablecoin assets with stablecoin platforms
+  const tableData = [
+    ...(formattedAssetPerformance || []),
+    ...stablecoinPlatforms,
+  ];
+
   const columns: ColumnDef<TCoinData>[] = [
     {
       accessorKey: "name",
@@ -79,11 +102,11 @@ export default function AssetPerformancePanel({
       enableHiding: true,
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <Avatar>
+          {/* <Avatar>
             <AvatarFallback className="text-white font-semibold">
               <img src={row.original.image} alt="" />
             </AvatarFallback>
-          </Avatar>
+          </Avatar> */}
           <p>{row.original.name}</p>
         </div>
       ),
@@ -114,7 +137,7 @@ export default function AssetPerformancePanel({
       accessorKey: "change",
       header: "Change",
       enableHiding: true,
-      cell: ({ row }) => <p>{`+${row.original.change}%`}</p>,
+      cell: ({ row }) => <p>{`${row.original.change}%`}</p>,
     },
     {
       accessorKey: "volume",
@@ -169,35 +192,17 @@ export default function AssetPerformancePanel({
       <h3 className="font-bold">Asset Performance Panel</h3>
       <div>
         <DataTable<TCoinData>
-          data={formattedAssetPerformance || []}
+          data={tableData || []}
           columns={columns}
           isLoading={isPending}
           page={page}
           limit={limit}
-          total={formattedAssetPerformance?.length}
+          total={tableData?.length}
           onPageChange={setPage}
           onLimitChange={setLimit}
           isPagination={false}
         />
       </div>
-
-      {/* Stablecoin Yield Matrix */}
-      {stablecoin && (
-        <div className="rounded-2xl border p-4 shadow-sm">
-          <h4 className="font-semibold mb-2">Stablecoin Yield Matrix</h4>
-          <p className="text-sm mb-3">
-            Current Yield:{" "}
-            <span className="font-bold text-green-600">
-              +{stablecoin.change_percent}%
-            </span>
-          </p>
-          <ul className="list-disc pl-5 text-sm space-y-1">
-            <li>USDC → Clearpool</li>
-            <li>USDT → Maple Prime</li>
-            <li>DAI → Frax Treasury Optimizer</li>
-          </ul>
-        </div>
-      )}
 
       {/* edit asset performance dialog */}
       <DialogWrapper

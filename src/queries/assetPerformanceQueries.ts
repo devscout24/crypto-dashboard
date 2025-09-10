@@ -5,6 +5,7 @@ import { toast } from "sonner";
 // Query Keys
 export const assetPerformanceQueryKeys = {
   assetPerformance: ["assetPerformance"] as const,
+  assetPlatforms: ["assetPlatforms"] as const,
 } as const;
 
 // Fetches latest the assetPerformance data
@@ -18,7 +19,7 @@ export const useAssetPerformanceData = () => {
 // fetches asset performance platforms data by id
 export const useAssetPlatformsById = (id: string) => {
   return useQuery({
-    queryKey: assetPerformanceQueryKeys.assetPerformance,
+    queryKey: assetPerformanceQueryKeys.assetPlatforms,
     queryFn: () => assetPerformanceApi.getAssetPlatformsById(id),
   });
 };

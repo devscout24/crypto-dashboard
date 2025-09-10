@@ -77,7 +77,6 @@ function ChartContent({ activeMonth }: { activeMonth: string }) {
     isLoading,
     refetch: refetchApiData,
   } = useNavChartData({ month: monthNumber, limit: 250 });
-  console.log({ dataToUse });
 
   // Process chart data
   useEffect(() => {
