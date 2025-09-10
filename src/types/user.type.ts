@@ -10,18 +10,25 @@ export type TUserData = {
   isStatus: boolean;
 };
 
-export type UserProfile = {
-  email: string;
+export type TUserInfo = {
   id: string;
+  email: string;
   fullName: string;
   img: string;
-  role: "ADMIN" | "USER";
+  role: "USER" | "ADMIN";
   userAllocations: {
     allocation: {
-      name: string;
       key: string;
+      name: string;
     };
   }[];
+};
+
+export type TUserInfoApiResponse = {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: TUserInfo;
 };
 
 export type GetUserAllocationsResponse = {
