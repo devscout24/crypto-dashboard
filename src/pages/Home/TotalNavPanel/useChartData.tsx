@@ -20,7 +20,7 @@ export function useChartData(activeMonth: string, currentMonth: string) {
     isLoading: apiLoading,
     error: apiError,
     refetch: refetchApiData,
-  } = useNavChartData({ period: "30d", limit: 250 });
+  } = useNavChartData();
   console.log({ navChartDataFromApi });
 
   // Request initial data when month changes or component mounts

@@ -1,14 +1,8 @@
 import SelectInput, { type SelectOption } from "@/components/SelectInput";
 import TotalNavChart from "./TotalNavChart";
 import { useState } from "react";
-<<<<<<< HEAD:src/pages/Home/components/TotalNavPanel.tsx
-import Loader from "@/components/Loader";
-import { cn } from "@/lib/utils";
-import type { TNavChartData } from "@/types";
-=======
 import type { TNavChartData } from "@/types";
 import { cn } from "@/lib/utils";
->>>>>>> staging:src/pages/Home/TotalNavPanel/components/TotalNavPanel.tsx
 import { useNavChartData } from "@/queries/cryptoQueries";
 
 const monthOptions: SelectOption[] = [
@@ -30,27 +24,6 @@ export default function TotalNavPanel() {
   const currentMonth = new Date().toLocaleString("default", { month: "long" });
   const [selected, setSelected] = useState<string>(currentMonth.toLowerCase());
 
-<<<<<<< HEAD:src/pages/Home/components/TotalNavPanel.tsx
-  const { data: navChartData, isPending } = useNavChartData({
-    period: "30d",
-  });
-
-  const totalNav = navChartData?.data.reduce(
-    (total: number, item: TNavChartData) => {
-      return total + item.endingNav;
-    },
-    0
-  );
-
-  const totalGrowth = navChartData?.data.reduce(
-    (total: number, item: TNavChartData) => {
-      return total + item.growthPercent;
-    },
-    0
-  );
-
-  const isUp = totalGrowth > 0;
-=======
   const { data: navChartData } = useNavChartData();
 
   // const activeMonth = selected || currentMonth;
@@ -87,17 +60,11 @@ export default function TotalNavPanel() {
     : 0;
 
   const isUp = Number(growthPercent) > 0 ? true : false;
->>>>>>> staging:src/pages/Home/TotalNavPanel/components/TotalNavPanel.tsx
 
   const handleMonthChange = (value: string) => {
     setSelected(value);
   };
 
-<<<<<<< HEAD:src/pages/Home/components/TotalNavPanel.tsx
-  if (isPending) return <Loader />;
-
-=======
->>>>>>> staging:src/pages/Home/TotalNavPanel/components/TotalNavPanel.tsx
   return (
     <section className="section-container p-0">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-6">
