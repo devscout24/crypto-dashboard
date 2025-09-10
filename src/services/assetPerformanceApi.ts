@@ -38,6 +38,24 @@ export const assetPerformanceApi = {
     return response.data;
   },
 
+  // create asset platform
+  createAssetPlatform: async (
+    assetPerformanceId: string,
+    data: {
+      platforms: {
+        name: string;
+        asset: string;
+        active: boolean;
+      }[];
+    }
+  ) => {
+    const response = await apiClient.post(
+      `asset-performance/${assetPerformanceId}/platforms`,
+      data
+    );
+    return response.data;
+  },
+
   // update asset platform by platform id
   updateAssetPlatform: async ({
     id,
@@ -53,6 +71,20 @@ export const assetPerformanceApi = {
     const response = await apiClient.patch(
       `/asset-performance/platforms/${id}`,
       data
+    );
+    return response.data;
+  },
+
+  // delete asset performance by id
+  deleteAssetPerformance: async (id: string) => {
+    const response = await apiClient.delete(`/asset-performance/${id}`);
+    return response.data;
+  },
+
+  // delete asset platform by id
+  deleteAssetPlatform: async (id: string) => {
+    const response = await apiClient.delete(
+      `/asset-performance/platforms/${id}`
     );
     return response.data;
   },

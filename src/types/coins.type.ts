@@ -16,9 +16,10 @@ export type TAssetPerformancePayload = {
   symbol: string;
   open: number;
   close: number;
-  change_percent: number;
-  volume_usd: number;
-  datetime: string;
+  changePercent: number;
+  volumeUsd: number;
+  minuteKey?: string;
+  date?: string;
 };
 
 export type TAssetPerformance = {

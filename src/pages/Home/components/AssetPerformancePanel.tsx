@@ -1,11 +1,13 @@
 import { DataTable } from "@/components/DataTable/dataTable";
 // import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, Pencil } from "lucide-react";
+import { ArrowDown, ArrowUp, Pencil, Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import {
   useAssetPerformanceData,
   useAssetPlatformsById,
+  useDeleteAssetPerformance,
+  useDeleteAssetPlatform,
 } from "@/queries/assetPerformanceQueries";
 
 // coins images
@@ -19,6 +21,8 @@ import type { TAssetPerformance, TCoinData, TPlatform } from "@/types";
 import { Button } from "@/components/ui/button";
 import { DialogWrapper } from "@/components/DialogWrapper";
 import AssetPerformanceForm from "@/pages/DataForms/components/AssetPerformanceForm";
+import { AlertDialogModal } from "@/components/AlertDialogModal";
+import AddAssetForm from "@/pages/DataForms/components/AddAssetForm";
 
 const coinImages: { [key: string]: string } = {
   ETH,
@@ -36,6 +40,8 @@ export default function AssetPerformancePanel({
 }) {
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(15);
+  const [isAddingAsset, setIsAddingAsset] = useState(false);
+  const [isAddingPlatform, setIsAddingPlatform] = useState(false);
   const [isEditingAssetPerformance, setIsEditingAssetPerformance] =
     useState(false);
   const [selectedRowToEdit, setSelectedRowToEdit] = useState<TCoinData>({
@@ -50,8 +56,18 @@ export default function AssetPerformancePanel({
     volume: 0,
     volumeTrend: "up",
   });
+  const [isDeletingAsset, setIsDeletingAsset] = useState(false);
+  const [assetToDelete, setAssetToDelete] = useState<{
+    id: string;
+    platformId: string;
+  }>({
+    id: "",
+    platformId: "",
+  });
 
   const { data: assetPerformanceData, isPending } = useAssetPerformanceData();
+  const { mutate: deleteAssetPerformance } = useDeleteAssetPerformance();
+  const { mutate: deleteAssetPlatform } = useDeleteAssetPlatform();
 
   const stablecoin = assetPerformanceData?.data.find(
     (item: TAssetPerformance) => item.symbol === "Stablecoin"
@@ -185,6 +201,20 @@ export default function AssetPerformancePanel({
                 >
                   <Pencil size={16} />
                 </Button>
+                <Button
+                  variant={"outline"}
+                  className=""
+                  onClick={() => {
+                    setIsDeletingAsset(true);
+                    setAssetToDelete({
+                      id: row.original.id || "",
+                      platformId: row.original.platformId || "",
+                    });
+                  }}
+                  title="Edit"
+                >
+                  <Trash size={16} />
+                </Button>
               </div>
             ),
           },
@@ -194,7 +224,21 @@ export default function AssetPerformancePanel({
 
   return (
     <section className="section-container h-full">
-      <h3 className="font-bold">Asset Performance Panel</h3>
+      {!fromAdmin && <h3 className="font-bold">Asset Performance Panel</h3>}
+
+      {fromAdmin && (
+        <div className="flex items-center justify-end gap-4">
+          <Button onClick={() => setIsAddingAsset(true)}>
+            <Plus className="h-4 w-4 mr-1" />
+            Add Asset
+          </Button>
+          <Button onClick={() => setIsAddingPlatform(true)}>
+            <Plus className="h-4 w-4 mr-1" />
+            Add Platform
+          </Button>
+        </div>
+      )}
+
       <div>
         <DataTable<TCoinData>
           data={tableData || []}
@@ -209,6 +253,32 @@ export default function AssetPerformancePanel({
         />
       </div>
 
+      {/* Add Asset Dialog */}
+      <DialogWrapper
+        isOpen={isAddingAsset}
+        onOpenChange={setIsAddingAsset}
+        onCancel={() => setIsAddingAsset(false)}
+        title="Add New Asset"
+      >
+        <AddAssetForm
+          isPlatform={false}
+          onClose={() => setIsAddingAsset(false)}
+        />
+      </DialogWrapper>
+
+      {/* Add Platform Dialog */}
+      <DialogWrapper
+        isOpen={isAddingPlatform}
+        onOpenChange={setIsAddingPlatform}
+        onCancel={() => setIsAddingPlatform(false)}
+        title="Add New Platform"
+      >
+        <AddAssetForm
+          isPlatform={true}
+          onClose={() => setIsAddingPlatform(false)}
+        />
+      </DialogWrapper>
+
       {/* edit asset performance dialog */}
       <DialogWrapper
         isOpen={isEditingAssetPerformance}
@@ -221,6 +291,29 @@ export default function AssetPerformancePanel({
           onClose={() => setIsEditingAssetPerformance(false)}
         />
       </DialogWrapper>
+
+      {/* delete asset performance alert dialog */}
+      <AlertDialogModal
+        isOpen={isDeletingAsset}
+        onOpenChange={setIsDeletingAsset}
+        title="Delete Asset Performance"
+        description="Are you sure you want to delete this asset performance?"
+        onConfirm={() => {
+          if (assetToDelete && assetToDelete.id) {
+            deleteAssetPerformance(assetToDelete?.id || "", {
+              onSuccess: () => {
+                setIsDeletingAsset(false);
+              },
+            });
+          } else if (assetToDelete && assetToDelete.platformId) {
+            deleteAssetPlatform(assetToDelete?.platformId || "", {
+              onSuccess: () => {
+                setIsDeletingAsset(false);
+              },
+            });
+          }
+        }}
+      />
     </section>
   );
 }
