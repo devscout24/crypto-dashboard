@@ -1,11 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DataTable } from "@/components/DataTable/dataTable";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import type { TCoinData } from "@/types";
+// import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp } from "lucide-react";
-import { useEffect, useState } from "react";
-import { mockData } from "@/data/mockData";
+import { ArrowDown, ArrowUp, Pencil } from "lucide-react";
+import { useState } from "react";
+import {
+  useAssetPerformanceData,
+  useAssetPlatformsById,
+} from "@/queries/assetPerformanceQueries";
 
 // coins images
 import ETH from "@/assets/icons/coins/Ethereum ETH.png";
@@ -14,6 +15,10 @@ import T from "@/assets/icons/coins/Group (2).png";
 import D from "@/assets/icons/coins/Group (3).png";
 import Synthetix from "@/assets/icons/coins/Synthetix Network SNX.png";
 import TrueUSD from "@/assets/icons/coins/TrueUSD TUSD.png";
+import type { TAssetPerformance, TCoinData, TPlatform } from "@/types";
+import { Button } from "@/components/ui/button";
+import { DialogWrapper } from "@/components/DialogWrapper";
+import AssetPerformanceForm from "@/pages/DataForms/components/AssetPerformanceForm";
 
 const coinImages: { [key: string]: string } = {
   ETH,
@@ -24,45 +29,84 @@ const coinImages: { [key: string]: string } = {
   SUSD: Synthetix,
 };
 
-export default function AssetPerformancePanel(): React.ReactNode {
+export default function AssetPerformancePanel({
+  fromAdmin = false,
+}: {
+  fromAdmin?: boolean;
+}) {
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(15);
-  const [coins, setCoins] = useState<TCoinData[]>([]);
+  const [isEditingAssetPerformance, setIsEditingAssetPerformance] =
+    useState(false);
+  const [selectedRowToEdit, setSelectedRowToEdit] = useState<TCoinData>({
+    image: "",
+    name: "",
+    symbol: "",
+    open: 0,
+    close: 0,
+    change: 0,
+    volume: 0,
+    volumeTrend: "up",
+  });
 
-  useEffect(() => {
-    const assetPerformanceData = mockData.assetPerformance;
+  const { data: assetPerformanceData, isPending } = useAssetPerformanceData();
 
-    const formattedCoinsData = Object.keys(assetPerformanceData).map(
-      (key) => {
-        const coin = assetPerformanceData[key as keyof typeof assetPerformanceData];
+  const stablecoin = assetPerformanceData?.data.find(
+    (item: TAssetPerformance) => item.symbol === "Stablecoin"
+  );
+
+  const { data: assetPerformancePlatforms } = useAssetPlatformsById(
+    stablecoin?.id || ""
+  );
+
+  const stablecoinPlatforms =
+    assetPerformancePlatforms?.data.map((platform: TPlatform) => ({
+      image: coinImages[platform.symbol] || "",
+      name: platform.name,
+      symbol: platform.symbol,
+      open: platform?.open || 0,
+      close: platform?.close || 0,
+      change: platform?.changePercent || 0,
+      volume: platform?.changePercent || 0,
+      volumeTrend: (platform?.changePercent || 0) >= 0 ? "up" : "down",
+    })) || [];
+
+  const formattedAssetPerformance =
+    assetPerformanceData?.data &&
+    assetPerformanceData?.data
+      ?.filter((item: TAssetPerformance) => item.symbol !== "Stablecoin")
+      .map((item: TAssetPerformance) => {
         return {
-          image: coinImages[key],
-          name: key,
-          symbol: coin.symbol,
-          open: `+${coin.open}`,
-          close: `+${coin.close}%`,
-          change: `+${coin.changePercent}`,
-          volume: `${(coin.volumeUsd / 1000000).toFixed(2)}M`,
+          image: coinImages[item?.symbol],
+          name: item?.name,
+          symbol: item?.symbol,
+          open: item?.open,
+          close: item?.close,
+          change: item?.change_percent,
+          volume: item?.volume_usd,
           volumeTrend:
-            coin.changePercent >= 0 ? ("up" as const) : ("down" as const),
+            item?.change_percent >= 0 ? ("up" as const) : ("down" as const),
         };
-      }
-    );
-    setCoins(formattedCoinsData);
-  }, []);
+      });
+
+  // Combine non-stablecoin assets with stablecoin platforms
+  const tableData = [
+    ...(formattedAssetPerformance || []),
+    ...stablecoinPlatforms,
+  ];
 
   const columns: ColumnDef<TCoinData>[] = [
     {
       accessorKey: "name",
-      header: "Name",
+      header: "Coin",
       enableHiding: true,
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <Avatar>
+          {/* <Avatar>
             <AvatarFallback className="text-white font-semibold">
               <img src={row.original.image} alt="" />
             </AvatarFallback>
-          </Avatar>
+          </Avatar> */}
           <p>{row.original.name}</p>
         </div>
       ),
@@ -72,23 +116,28 @@ export default function AssetPerformancePanel(): React.ReactNode {
       header: "",
       enableHiding: true,
       cell: ({ row }) => (
-        <p className="text-muted-foreground">{row.original.symbol}</p>
+        <div className="flex items-center gap-2">
+          <p>{row.original.symbol}</p>
+        </div>
       ),
     },
     {
       accessorKey: "open",
       header: "Open",
       enableHiding: true,
+      cell: ({ row }) => <p>{`+${row.original.open}$`}</p>,
     },
     {
       accessorKey: "close",
       header: "Close",
       enableHiding: true,
+      cell: ({ row }) => <p>{`+${row.original.close}$`}</p>,
     },
     {
       accessorKey: "change",
       header: "Change",
       enableHiding: true,
+      cell: ({ row }) => <p>{`${row.original.change}%`}</p>,
     },
     {
       accessorKey: "volume",
@@ -98,37 +147,71 @@ export default function AssetPerformancePanel(): React.ReactNode {
         <div
           className={`
           flex items-center justify-center
-          ${row.original.volumeTrend === "up"
+          ${
+            row.original.volumeTrend === "up"
               ? "text-green-500"
               : "text-red-500"
-            }
+          }
         `}
         >
-          <p>{row.original.volume}</p>
+          <p>{`${(row.original.volume / 1000000).toFixed(2)}M`}</p>
           <div>
             {row.original.volumeTrend === "up" ? <ArrowUp /> : <ArrowDown />}
           </div>
         </div>
       ),
     },
+    ...(fromAdmin
+      ? [
+          {
+            id: "actions",
+            header: "Actions",
+            enableHiding: false,
+            cell: ({ row }: { row: { original: TCoinData } }) => (
+              <div className="flex items-center justify-center gap-2">
+                <Button
+                  variant={"outline"}
+                  className=""
+                  onClick={() => {
+                    setIsEditingAssetPerformance(true);
+                    setSelectedRowToEdit(row.original);
+                  }}
+                  title="Edit"
+                >
+                  <Pencil size={16} />
+                </Button>
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
-    <section className="section-container">
+    <section className="section-container h-full">
       <h3 className="font-bold">Asset Performance Panel</h3>
       <div>
         <DataTable<TCoinData>
-          data={coins}
+          data={tableData || []}
           columns={columns}
-          isLoading={!coins.length}
+          isLoading={isPending}
           page={page}
           limit={limit}
-          total={coins.length}
+          total={tableData?.length}
           onPageChange={setPage}
           onLimitChange={setLimit}
           isPagination={false}
         />
       </div>
+
+      {/* edit asset performance dialog */}
+      <DialogWrapper
+        isOpen={isEditingAssetPerformance}
+        onOpenChange={setIsEditingAssetPerformance}
+        title="Edit Asset Performance"
+      >
+        <AssetPerformanceForm selectedRowToEdit={selectedRowToEdit} />
+      </DialogWrapper>
     </section>
   );
 }

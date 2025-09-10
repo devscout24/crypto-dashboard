@@ -18,6 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import DatePicker from "@/components/DatePicker";
+import { TimePicker } from "@/components/TimePicker";
+import { DateTimePicker } from "@/components/DateTimePicker";
+import { useAllocationByKey } from "@/queries/cryptoQueries";
+import { allocationOptions } from "@/pages/AllocationManagement/allocationOptions";
+import { X } from "lucide-react";
+import { useEffect } from "react";
 
 const allocationSchema = z.object({
   allocation: z.string().min(1, "Allocation is required"),
@@ -29,7 +36,15 @@ const allocationSchema = z.object({
   nextUnlock: z.string().min(1, "Next unlock epoch is required"),
 });
 
-export default function AllocationsForm() {
+export default function AllocationsForm({
+  allocationToEdit,
+  onClose,
+}: {
+  allocationToEdit: string | null;
+  onClose?: () => void;
+}) {
+  const isEdit: boolean = !!allocationToEdit;
+
   const form = useForm<z.infer<typeof allocationSchema>>({
     resolver: zodResolver(allocationSchema),
     defaultValues: {
@@ -43,6 +58,25 @@ export default function AllocationsForm() {
     },
   });
 
+  const { data } = useAllocationByKey(allocationToEdit as string);
+
+  useEffect(() => {
+    if (isEdit && data?.data) {
+      console.log({ isEdit, allocationToEdit });
+      setTimeout(() => {
+        form.reset({
+          allocation: allocationToEdit || "",
+          date: data.data.date || "",
+          time: data.data.time || "",
+          value: data.data.value || 0,
+          timer: data.data.timer || "",
+          lastPayout: data.data.lastPayout || "",
+          nextUnlock: data.data.nextUnlock || "",
+        });
+      }, 0);
+    }
+  }, [data, form, allocationToEdit, isEdit]);
+
   async function onSubmit(values: z.infer<typeof allocationSchema>) {
     console.log("Allocation Form Submitted", values);
     toast.success("Allocation data submitted successfully!");
@@ -54,24 +88,34 @@ export default function AllocationsForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 bg-card p-4 rounded-lg"
       >
-        <h2 className="text-xl font-semibold">Allocations</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">
+            {isEdit ? data?.data?.name : "Create New Allocation"}
+          </h2>
+          <Button variant={"outline"} onClick={onClose}>
+            <X className="h-4 w-4 mr-1" />
+            Cancel
+          </Button>
+        </div>
+
         <FormField
           control={form.control}
           name="allocation"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Allocation</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger disabled={isEdit}>
                     <SelectValue placeholder="Select an allocation" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="A">Allocation A</SelectItem>
-                  <SelectItem value="B">Allocation B</SelectItem>
-                  <SelectItem value="C">Allocation C</SelectItem>
-                  <SelectItem value="D">Allocation D</SelectItem>
+                  {allocationOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -86,7 +130,10 @@ export default function AllocationsForm() {
               <FormItem>
                 <FormLabel>Date</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <DatePicker
+                    {...field}
+                    onChange={(date) => field.onChange(date)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -99,7 +146,10 @@ export default function AllocationsForm() {
               <FormItem>
                 <FormLabel>Time</FormLabel>
                 <FormControl>
-                  <Input type="time" {...field} />
+                  <TimePicker
+                    {...field}
+                    onChange={(value) => field.onChange(value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -142,7 +192,10 @@ export default function AllocationsForm() {
               <FormItem>
                 <FormLabel>Last Payout Event</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <DateTimePicker
+                    {...field}
+                    onChange={(date) => field.onChange(date)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -155,14 +208,17 @@ export default function AllocationsForm() {
               <FormItem>
                 <FormLabel>Next Unlock Epoch</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <DateTimePicker
+                    {...field}
+                    onChange={(date) => field.onChange(date)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        <Button type="submit">Update Allocation</Button>
+        <Button type="submit">{isEdit ? "Update" : "Create"} Allocation</Button>
       </form>
     </FormProvider>
   );

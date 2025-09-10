@@ -24,7 +24,7 @@ export default function AllocationAreaChart({
       const dataMax = Math.max(...values);
 
       const padding = (dataMax - dataMin) * 0.1;
-      const newMinValue = Math.floor(dataMin - padding);
+      const newMinValue = Math.floor(dataMin);
       const newMaxValue = Math.ceil(dataMax + padding);
       setMinValue(newMinValue);
       setMaxValue(newMaxValue);
@@ -39,7 +39,7 @@ export default function AllocationAreaChart({
   }, [chartData]);
 
   return (
-    <ChartContainer config={chartConfig}>
+    <ChartContainer config={chartConfig} className="w-full h-[200px]">
       <AreaChart
         accessibilityLayer
         data={chartData}

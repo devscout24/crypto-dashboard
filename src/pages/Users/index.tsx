@@ -1,4 +1,4 @@
-import { useDeleteUser, useUsers } from "@/queries/userQueries";
+import { useDeleteUser, useSingleUser, useUsers } from "@/queries/userQueries";
 import { useTitleStore } from "@/stores/titleStore";
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/DataTable/dataTable";
@@ -12,16 +12,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { DialogWrapper } from "@/components/DialogWrapper";
 import { AlertDialogModal } from "@/components/AlertDialogModal";
 import UserDetails from "./components/UserDetails";
-
-type TUserData = {
-  id: string;
-  email: string;
-  fullName: string;
-  createdAt: string;
-  role: "ADMIN" | "USER";
-  img: string;
-  isStatus: boolean;
-};
+import AssignUnassignToAllocation from "./components/AssignUnassignToAllocation";
+import type { TUserData } from "@/types";
+import PageLoader from "@/components/Loader";
 
 export default function Users() {
   const { setTitle } = useTitleStore();
@@ -40,7 +33,10 @@ export default function Users() {
   const [userToDeleteId, setUserToDeleteId] = useState<string>("");
   const [userToViewId, setUserToViewId] = useState<string>("");
 
-  const { mutate: deleteUser } = useDeleteUser();
+  const { mutate: deleteUser, isPending: isDeleteUserPending } =
+    useDeleteUser();
+  const userId = userToEditId ? userToEditId : undefined;
+  const { isPending: isUserPending } = useSingleUser(userId ?? "");
 
   useEffect(() => {
     setTitle("User Management");
@@ -105,6 +101,19 @@ export default function Users() {
       size: 180,
       cell: ({ row }) => <div className="text-center">{row.original.role}</div>,
     },
+    // Assign/Unassign User to Allocation
+    {
+      id: "allocations",
+      header: () => <div className="text-center">Allocations</div>,
+      enableHiding: false,
+      cell: ({ row }) => {
+        return (
+          <div className="flex justify-center">
+            <AssignUnassignToAllocation userData={row?.original} />
+          </div>
+        );
+      },
+    },
     {
       id: "actions",
       header: () => <span className="text-center">Actions</span>,
@@ -152,6 +161,10 @@ export default function Users() {
       },
     },
   ];
+
+  if (isUserPending || isDeleteUserPending) {
+    return <PageLoader />;
+  }
 
   return (
     <section className="section-container">

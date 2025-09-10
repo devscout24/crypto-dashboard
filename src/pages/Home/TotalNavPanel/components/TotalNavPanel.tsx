@@ -1,9 +1,14 @@
 import SelectInput, { type SelectOption } from "@/components/SelectInput";
 import TotalNavChart from "./TotalNavChart";
 import { useState } from "react";
+<<<<<<< HEAD:src/pages/Home/components/TotalNavPanel.tsx
 import Loader from "@/components/Loader";
 import { cn } from "@/lib/utils";
 import type { TNavChartData } from "@/types";
+=======
+import type { TNavChartData } from "@/types";
+import { cn } from "@/lib/utils";
+>>>>>>> staging:src/pages/Home/TotalNavPanel/components/TotalNavPanel.tsx
 import { useNavChartData } from "@/queries/cryptoQueries";
 
 const monthOptions: SelectOption[] = [
@@ -25,6 +30,7 @@ export default function TotalNavPanel() {
   const currentMonth = new Date().toLocaleString("default", { month: "long" });
   const [selected, setSelected] = useState<string>(currentMonth.toLowerCase());
 
+<<<<<<< HEAD:src/pages/Home/components/TotalNavPanel.tsx
   const { data: navChartData, isPending } = useNavChartData({
     period: "30d",
   });
@@ -44,22 +50,62 @@ export default function TotalNavPanel() {
   );
 
   const isUp = totalGrowth > 0;
+=======
+  const { data: navChartData } = useNavChartData();
+
+  // const activeMonth = selected || currentMonth;
+
+  // Request data when month changes or component mounts
+  // useEffect(() => {
+  //   if (isConnected) {
+  //     const requestData = {
+  //       month: activeMonth,
+  //       year: new Date().getFullYear(),
+  //     };
+
+  //     console.log("Requesting chart data for:", requestData);
+  //     emit("request_chart_data", requestData);
+  //   }
+  // }, [activeMonth, isConnected, emit]);
+
+  const totalNav =
+    navChartData?.data &&
+    navChartData?.data.reduce((total: number, item: TNavChartData) => {
+      return total + item?.nav;
+    }, 0);
+
+  const lastTwo = navChartData?.data && navChartData?.data.slice(-2);
+
+  const lastTwoNavDiff =
+    lastTwo &&
+    lastTwo.reduce((total: number, item: TNavChartData) => {
+      return item?.nav - total;
+    }, 0);
+
+  const growthPercent = lastTwoNavDiff
+    ? ((lastTwoNavDiff / lastTwo[0]?.nav) * 100).toFixed(2)
+    : 0;
+
+  const isUp = Number(growthPercent) > 0 ? true : false;
+>>>>>>> staging:src/pages/Home/TotalNavPanel/components/TotalNavPanel.tsx
 
   const handleMonthChange = (value: string) => {
-    console.log("Selected month:", value);
     setSelected(value);
   };
 
+<<<<<<< HEAD:src/pages/Home/components/TotalNavPanel.tsx
   if (isPending) return <Loader />;
 
+=======
+>>>>>>> staging:src/pages/Home/TotalNavPanel/components/TotalNavPanel.tsx
   return (
     <section className="section-container p-0">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-6">
-        <h3 className="text-foreground/80 text-xs">
+        <h3>
           Total NAV
-          <span className="text-foreground text-[16px] font-bold ml-1">
-            {`$${totalNav?.toFixed(2)}`}
-          </span>
+          <p className="text-foreground text-[16px] font-bold ml-1">
+            {totalNav?.toFixed(2) || 1400000}
+          </p>
         </h3>
 
         <div className="flex flex-wrap items-center gap-4 md:gap-5">
@@ -70,8 +116,8 @@ export default function TotalNavPanel() {
                 "text-red-500": !isUp,
               })}
             >
-              {isUp ? "+" : "-"}
-              {`${totalGrowth?.toFixed(2)}%`}
+              {isUp ? "+" : ""}
+              {growthPercent || 0}%
             </p>
             <p className="text-foreground/70 text-[10px]">Total growth</p>
           </div>
@@ -88,7 +134,10 @@ export default function TotalNavPanel() {
 
       {/* Chart */}
       <div className="pr-6">
-        <TotalNavChart />
+        <TotalNavChart
+          selectedMonth={selected}
+          onMonthChange={handleMonthChange}
+        />
       </div>
     </section>
   );

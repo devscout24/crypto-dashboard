@@ -9,13 +9,30 @@ import {
 } from "lucide-react";
 import { type Sidebar } from "@/components/ui/sidebar";
 import NavSidebar from "./navSidebar";
-import type { NavItem } from "@/types";
+import type { NavItem, TAllocation } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
+import { useAllocations } from "@/queries/cryptoQueries";
+import { useProfile } from "@/queries/userQueries";
 
 export default function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const currentUser = useAuth();
+
+  const { data: userData } = useProfile();
+  const { data } = useAllocations();
+
+  const allocations =
+    currentUser?.role === "ADMIN"
+      ? data?.data &&
+        data?.data.map((item: TAllocation) => ({
+          title: item?.name,
+          url: `/dashboard/allocations/${item.key.toLowerCase()}`,
+        }))
+      : userData?.data?.userAllocations.map((item) => ({
+          title: item?.allocation?.name,
+          url: `/dashboard/allocations/${item?.allocation?.key.toLowerCase()}`,
+        }));
 
   const items: NavItem[] = [
     {
@@ -34,24 +51,7 @@ export default function AppSidebar({
       title: "Allocations",
       icon: <Clipboard />,
       end: false,
-      childLinks: [
-        {
-          title: "Allocation A",
-          url: "/dashboard/allocations/a",
-        },
-        {
-          title: "Allocation B",
-          url: "/dashboard/allocations/b",
-        },
-        {
-          title: "Allocation C",
-          url: "/dashboard/allocations/c",
-        },
-        {
-          title: "Allocation D",
-          url: "/dashboard/allocations/d",
-        },
-      ],
+      childLinks: allocations,
     },
   ];
 
@@ -70,13 +70,12 @@ export default function AppSidebar({
     });
     // Add the new "Add Allocation" button for admins
     items.push({
-      title: "Add Allocation",
-      url: "/dashboard/add-allocation",
+      title: "Allocation Management",
+      url: "/dashboard/allocation-management",
       icon: <PlusCircle />,
       end: true,
     });
   }
-
 
   if (!currentUser) {
     items.push({ title: "Not Authorized User", icon: <ShieldBan /> });
@@ -85,6 +84,7 @@ export default function AppSidebar({
   if (items.length === 0) {
     return null;
   }
+
   return (
     <section>
       <NavSidebar navItems={items} props={props} />

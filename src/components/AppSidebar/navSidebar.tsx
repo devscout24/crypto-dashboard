@@ -13,14 +13,22 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "react-router";
 import NavUser from "./navUser";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../ui/collapsible";
 import { ChevronRight, X } from "lucide-react";
 import type { NavItem } from "@/types";
 import logo from "@/assets/image/logo.svg";
 
-export default function NavSidebar(
-  { navItems, ...props }:
-    { navItems: NavItem[], props: React.ComponentProps<typeof Sidebar> }) {
+export default function NavSidebar({
+  navItems,
+  ...props
+}: {
+  navItems: NavItem[];
+  props: React.ComponentProps<typeof Sidebar>;
+}) {
   const { state, toggleSidebar } = useSidebar();
 
   return (
@@ -33,7 +41,8 @@ export default function NavSidebar(
             </h1>
           ) : (
             <h1 className="lg:w-[180px] text-[24px] font-bold lg:text-center text-primary flex justify-center items-center ">
-              Vault<img className="w-[30px]" src={logo} alt="" />
+              Vault
+              <img className="w-[30px]" src={logo} alt="" />
             </h1>
           )}
         </div>
@@ -46,8 +55,8 @@ export default function NavSidebar(
         </button>
 
         <SidebarMenu className="-mt-2.5">
-          {navItems.map((item, i) => (
-            item.childLinks ?
+          {navItems.map((item, i) =>
+            item.childLinks ? (
               <Collapsible
                 key={item.title}
                 asChild
@@ -63,8 +72,8 @@ export default function NavSidebar(
                       <span className="!size-7 transition-colors">
                         {item.icon}
                       </span>
-                      <h4 className="text-lg text-nowrap duration-300">
-                        {item.title}
+                      <h4 className="text-lg duration-300 w-full min-w-0">
+                        <span className="truncate block">{item.title}</span>
                       </h4>
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
@@ -75,7 +84,10 @@ export default function NavSidebar(
                         key={subItem.title}
                         to={subItem?.url as string}
                         className={({ isActive }) =>
-                          `w-full ${isActive ? "bg-white text-primary" : "text-[#797979]"
+                          `w-full ${
+                            isActive
+                              ? "bg-white text-primary"
+                              : "text-[#797979]"
                           }`
                         }
                       >
@@ -84,10 +96,11 @@ export default function NavSidebar(
                             <SidebarMenuSubItem>
                               <SidebarMenuSubButton
                                 asChild
-                                className={`w-full hover:bg-gradient-to-r from-primary/50 to-primary/10 text-foreground rounded-none py-4 ${isActive
-                                  ? "bg-gradient-to-r from-primary/50 to-primary/0 text-foreground shadow-sm"
-                                  : ""
-                                  }`}
+                                className={`w-full hover:bg-gradient-to-r from-primary/50 to-primary/10 text-foreground rounded-none py-4 ${
+                                  isActive
+                                    ? "bg-gradient-to-r from-primary/50 to-primary/0 text-foreground shadow-sm"
+                                    : ""
+                                }`}
                               >
                                 <span>{subItem.title}</span>
                               </SidebarMenuSubButton>
@@ -98,36 +111,39 @@ export default function NavSidebar(
                     ))}
                   </CollapsibleContent>
                 </SidebarMenuItem>
-              </Collapsible> :
+              </Collapsible>
+            ) : (
               <SidebarMenuItem key={i}>
                 <NavLink
                   to={item?.url as string}
                   end={item?.end}
                   className={({ isActive }) =>
-                    `w-full ${isActive ? "bg-white text-primary" : "text-[#797979]"
+                    `w-full ${
+                      isActive ? "bg-white text-primary" : "text-[#797979]"
                     }`
                   }
                 >
                   {({ isActive }) => (
                     <SidebarMenuButton
                       tooltip={item?.title}
-                      className={`w-full hover:bg-gradient-to-r from-primary/50 to-primary/10 text-foreground rounded-none py-6 ${isActive
-                        ? "bg-gradient-to-r from-primary/50 to-primary/0 text-foreground shadow-sm"
-                        : ""
-                        }`}
+                      className={`w-full hover:bg-gradient-to-r from-primary/50 to-primary/10 text-foreground rounded-none py-6 ${
+                        isActive
+                          ? "bg-gradient-to-r from-primary/50 to-primary/0 text-foreground shadow-sm"
+                          : ""
+                      }`}
                     >
                       <span className="!size-7 transition-colors">
                         {item.icon}
                       </span>
-                      <h4 className="text-lg text-nowrap duration-300">
-                        {item.title}
+                      <h4 className="text-lg duration-300 w-full min-w-0">
+                        <span className="truncate block">{item.title}</span>
                       </h4>
                     </SidebarMenuButton>
                   )}
                 </NavLink>
               </SidebarMenuItem>
-
-          ))}
+            )
+          )}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
@@ -136,4 +152,4 @@ export default function NavSidebar(
       <SidebarRail />
     </Sidebar>
   );
-};
+}

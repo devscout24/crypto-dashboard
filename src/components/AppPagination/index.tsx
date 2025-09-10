@@ -1,19 +1,23 @@
 import { Button } from "../ui/button";
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink } from "../ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+} from "../ui/pagination";
 
-export default function AppPagination(
-  {
-    total,
-    limit,
-    page,
-    onPageChange
-  }: {
-    total: number;
-    limit: number;
-    page: number;
-    onPageChange: (page: number) => void;
-  }
-) {
+export default function AppPagination({
+  total,
+  limit,
+  page,
+  onPageChange,
+}: {
+  total: number;
+  limit: number;
+  page: number;
+  onPageChange: (page: number) => void;
+}) {
   return (
     <div>
       <Pagination>
@@ -41,10 +45,12 @@ export default function AppPagination(
                 <PaginationLink
                   isActive={pageNumber === page}
                   onClick={(e) => {
-                    e.preventDefault()
-                    onPageChange(pageNumber)
+                    e.preventDefault();
+                    onPageChange(pageNumber);
                   }}
-                  className={`border-primary ${pageNumber === page ? 'text-primary' : ''}`}
+                  className={`border-primary ${
+                    pageNumber === page ? "text-primary" : ""
+                  }`}
                 >
                   {pageNumber}
                 </PaginationLink>
@@ -72,4 +78,4 @@ export default function AppPagination(
       </Pagination>
     </div>
   );
-};
+}

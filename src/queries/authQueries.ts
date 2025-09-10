@@ -30,7 +30,10 @@ export const useLogin = () => {
       navigate("/dashboard");
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Login failed");
+      console.error("Login error:", error);
+      toast.error(
+        error.response?.data?.message || error.message || "Login failed"
+      );
     },
   });
 };
@@ -60,6 +63,7 @@ export const useLogout = () => {
     onSuccess: () => {
       logout();
       queryClient.clear();
+      authStore.persist.clearStorage();
       toast.success("Logged out successfully");
       navigate("/login", { replace: true });
     },

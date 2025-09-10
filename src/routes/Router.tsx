@@ -1,4 +1,3 @@
-// crypto-dashboard/src/routes/Router.tsx
 import App from "@/App";
 import DashboardLayout from "@/layout/DashboardLayout";
 import HomePage from "@/pages/Home";
@@ -9,10 +8,23 @@ import Allocations from "@/pages/Allocations";
 import LoginPage from "@/pages/Login";
 import ForgotPasswordPage from "@/pages/ForgotPassword";
 import ResetPasswordPage from "@/pages/ResetPassword";
-// import RegisterPage from "@/pages/Register";
 import { ProtectedRoute } from "./ProtectedRoute";
 import Users from "@/pages/Users";
-import AddAllocationPage from "@/pages/AddAllocation";
+import AllocationsManagementPage from "@/pages/AllocationManagement";
+
+const allocationChildren = [];
+for (let i = "a".charCodeAt(0); i <= "z".charCodeAt(0); i++) {
+  const letter = String.fromCharCode(i);
+  allocationChildren.push({
+    path: letter,
+    element: (
+      <ProtectedRoute roles={["ADMIN", "USER"]}>
+        <Allocations />
+      </ProtectedRoute>
+    ),
+  });
+}
+
 export const routes = createBrowserRouter([
   {
     path: "/",
@@ -31,10 +43,6 @@ export const routes = createBrowserRouter([
     path: "/reset-password",
     element: <ResetPasswordPage />,
   },
-  // {
-  //   path: "/register",
-  //   element: <RegisterPage />,
-  // },
   // Dashboard
   {
     path: "/dashboard",
@@ -59,41 +67,45 @@ export const routes = createBrowserRouter([
       },
       {
         path: "allocations",
-        children: [
-          {
-            path: "a",
-            element: (
-              <ProtectedRoute roles={["ADMIN", "USER"]}>
-                <Allocations />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: "b",
-            element: (
-              <ProtectedRoute roles={["ADMIN", "USER"]}>
-                <Allocations />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: "c",
-            element: (
-              <ProtectedRoute roles={["ADMIN", "USER"]}>
-                <Allocations />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: "d",
-            element: (
-              <ProtectedRoute roles={["ADMIN", "USER"]}>
-                <Allocations />
-              </ProtectedRoute>
-            ),
-          },
-        ],
+        children: allocationChildren,
       },
+      // {
+      //   path: "allocations",
+      //   children: [
+      //     {
+      //       path: "a",
+      //       element: (
+      //         <ProtectedRoute roles={["ADMIN", "USER"]}>
+      //           <Allocations />
+      //         </ProtectedRoute>
+      //       ),
+      //     },
+      //     {
+      //       path: "b",
+      //       element: (
+      //         <ProtectedRoute roles={["ADMIN", "USER"]}>
+      //           <Allocations />
+      //         </ProtectedRoute>
+      //       ),
+      //     },
+      //     {
+      //       path: "c",
+      //       element: (
+      //         <ProtectedRoute roles={["ADMIN", "USER"]}>
+      //           <Allocations />
+      //         </ProtectedRoute>
+      //       ),
+      //     },
+      //     {
+      //       path: "d",
+      //       element: (
+      //         <ProtectedRoute roles={["ADMIN", "USER"]}>
+      //           <Allocations />
+      //         </ProtectedRoute>
+      //       ),
+      //     },
+      //   ],
+      // },
       {
         path: "users",
         element: (
@@ -111,14 +123,13 @@ export const routes = createBrowserRouter([
         ),
       },
       {
-        path: "add-allocation",
+        path: "allocation-management",
         element: (
           <ProtectedRoute roles={["ADMIN"]}>
-            <AddAllocationPage />
+            <AllocationsManagementPage />
           </ProtectedRoute>
         ),
       },
     ],
   },
 ]);
- 

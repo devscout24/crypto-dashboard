@@ -1,5 +1,3 @@
-// crypto-dashboard/src/pages/Users/components/AddUserForm.tsx
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,13 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff } from "lucide-react";
-import { useRegister } from "@/queries/authQueries";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useSingleUser, useUpdateUser } from "@/queries/userQueries";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useRegister } from "@/queries/authQueries";
+import { useSingleUser, useUpdateUser } from "@/queries/userQueries";
 
 const userImages = [
   "https://i.ibb.co/jPWwK4hG/5864188-1.png",
@@ -40,8 +37,6 @@ const userImages = [
   "https://i.ibb.co/3mqH2LWM/1-23-3-17-16-2-13m.png",
 ];
 
-const allocations = ["A", "B", "C", "D"];
-
 const formSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email address"),
@@ -52,9 +47,6 @@ const formSchema = z.object({
   role: z.enum(["USER", "ADMIN"]),
   img: z.string().min(1, "Image is required"),
   isStatus: z.boolean(),
-  allocations: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "You have to select at least one item.",
-  }),
 });
 
 export default function AddUserForm({
@@ -66,10 +58,6 @@ export default function AddUserForm({
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
-  const { mutate: createUser, isPending } = useRegister();
-  const { data: user } = useSingleUser(userId ?? "");
-  const { mutate: updateUser } = useUpdateUser();
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -79,12 +67,12 @@ export default function AddUserForm({
       role: "USER",
       img: userImages[0],
       isStatus: true,
-      allocations: [],
     },
   });
 
-  const { errors } = form.formState;
-  console.log("Form errors:", errors);
+  const { mutate: createUser, isPending: isRegisterPending } = useRegister();
+  const { mutate: updateUser, isPending: isUpdatePending } = useUpdateUser();
+  const { data: user } = useSingleUser(userId ?? "");
 
   // Update form values when user data is loaded
   useEffect(() => {
@@ -97,28 +85,34 @@ export default function AddUserForm({
         role: user.data.role || "USER",
         img: user.data.img || userImages[0],
         isStatus: user.data.isStatus ?? true,
-        allocations: user.data.allocations || [],
       });
     }
   }, [user, userId, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({ values });
     const editPayload = {
       fullName: values.fullName,
       email: values.email,
       role: values.role,
       img: values.img,
       isStatus: values.isStatus,
-      allocations: values.allocations,
     };
 
     if (userId) {
-      updateUser({ data: editPayload, id: userId });
-      onClose();
+      updateUser(
+        { data: editPayload, id: userId },
+        {
+          onSuccess: () => {
+            onClose();
+          },
+        }
+      );
     } else {
-      createUser(values);
-      onClose();
+      createUser(values, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
     }
   }
 
@@ -172,6 +166,7 @@ export default function AddUserForm({
           )}
         />
 
+        {/* Full Name */}
         <FormField
           control={form.control}
           name="fullName"
@@ -185,6 +180,8 @@ export default function AddUserForm({
             </FormItem>
           )}
         />
+
+        {/* Email */}
         <FormField
           control={form.control}
           name="email"
@@ -202,6 +199,7 @@ export default function AddUserForm({
             </FormItem>
           )}
         />
+
         {/* Password */}
         {!userId && (
           <FormField
@@ -238,6 +236,7 @@ export default function AddUserForm({
           />
         )}
 
+        {/* Role */}
         <FormField
           control={form.control}
           name="role"
@@ -255,55 +254,6 @@ export default function AddUserForm({
                   <SelectItem value="ADMIN">Admin</SelectItem>
                 </SelectContent>
               </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="allocations"
-          render={() => (
-            <FormItem>
-              <div className="mb-4">
-                <FormLabel className="text-lg">Allocations</FormLabel>
-              </div>
-              <div className="flex items-center space-x-4">
-                {allocations.map((item) => (
-                  <FormField
-                    key={item}
-                    control={form.control}
-                    name="allocations"
-                    render={({ field }) => {
-                      return (
-                        <FormItem
-                          key={item}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
-                          <FormControl>
-                            <Checkbox
-                            className="border-white"
-                              checked={field.value?.includes(item)}
-                              onCheckedChange={(checked) => {
-                                return checked
-                                  ? field.onChange([...field.value, item])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== item
-                                      )
-                                    );
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            Allocation {item}
-                          </FormLabel>
-                        </FormItem>
-                      );
-                    }}
-                  />
-                ))}
-              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -337,8 +287,16 @@ export default function AddUserForm({
           )}
         />
 
-        <Button type="submit" disabled={isPending} className="w-full">
-          {userId ? "Update User" : "Add User"}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isRegisterPending || isUpdatePending}
+        >
+          {isRegisterPending || isUpdatePending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <>{userId ? "Update User" : "Add User"}</>
+          )}
         </Button>
       </form>
     </FormProvider>

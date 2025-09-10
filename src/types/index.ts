@@ -4,3 +4,4 @@ export * from "./navItem.type";
 export * from "./allocation.type";
 export * from "./auth.type";
 export * from "./crypto.type";
+export * from "./user.type";

@@ -1,6 +1,7 @@
 export type TPerformanceReportCard = {
+  id: string;
   date: string;
-  deception: string;
+  description: string;
   startingNAV: string;
   endingNAV: string;
   growthRate: {
@@ -11,10 +12,20 @@ export type TPerformanceReportCard = {
   };
 };
 
+export type TPerformanceReportApiResponse = {
+  id: string;
+  note: string;
+  starting: string;
+  ending: string;
+  growthRate: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type TPerformanceRecord = {
   date: string;
   balance: string;
   dailyChange: string;
   percentChange: string;
   notes: string;
-}
+};
