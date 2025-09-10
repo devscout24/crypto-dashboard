@@ -1,4 +1,6 @@
 export type TCoinData = {
+  id?: string;
+  platformId?: string;
   image: string;
   name: string;
   symbol: string;
@@ -7,6 +9,7 @@ export type TCoinData = {
   change: number;
   volume: number;
   volumeTrend: "up" | "down";
+  active?: boolean;
 };
 
 export type TAssetPerformancePayload = {

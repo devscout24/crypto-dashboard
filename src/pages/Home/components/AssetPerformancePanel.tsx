@@ -39,6 +39,8 @@ export default function AssetPerformancePanel({
   const [isEditingAssetPerformance, setIsEditingAssetPerformance] =
     useState(false);
   const [selectedRowToEdit, setSelectedRowToEdit] = useState<TCoinData>({
+    id: "",
+    platformId: "",
     image: "",
     name: "",
     symbol: "",
@@ -61,6 +63,7 @@ export default function AssetPerformancePanel({
 
   const stablecoinPlatforms =
     assetPerformancePlatforms?.data.map((platform: TPlatform) => ({
+      platformId: platform.id,
       image: coinImages[platform.symbol] || "",
       name: platform.name,
       symbol: platform.symbol,
@@ -69,6 +72,7 @@ export default function AssetPerformancePanel({
       change: platform?.changePercent || 0,
       volume: platform?.changePercent || 0,
       volumeTrend: (platform?.changePercent || 0) >= 0 ? "up" : "down",
+      active: platform?.active || false,
     })) || [];
 
   const formattedAssetPerformance =
@@ -77,6 +81,7 @@ export default function AssetPerformancePanel({
       ?.filter((item: TAssetPerformance) => item.symbol !== "Stablecoin")
       .map((item: TAssetPerformance) => {
         return {
+          id: item?.id,
           image: coinImages[item?.symbol],
           name: item?.name,
           symbol: item?.symbol,
@@ -208,9 +213,13 @@ export default function AssetPerformancePanel({
       <DialogWrapper
         isOpen={isEditingAssetPerformance}
         onOpenChange={setIsEditingAssetPerformance}
+        onCancel={() => setIsEditingAssetPerformance(false)}
         title="Edit Asset Performance"
       >
-        <AssetPerformanceForm selectedRowToEdit={selectedRowToEdit} />
+        <AssetPerformanceForm
+          selectedRowToEdit={selectedRowToEdit}
+          onClose={() => setIsEditingAssetPerformance(false)}
+        />
       </DialogWrapper>
     </section>
   );

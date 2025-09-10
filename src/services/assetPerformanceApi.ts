@@ -27,11 +27,33 @@ export const assetPerformanceApi = {
   }: {
     id: string;
     data: {
+      name: string;
+      open: number;
       close: number;
       changePercent?: number;
+      volumeUsd: number;
     };
   }) => {
-    const response = await apiClient.put(`/asset-performance/${id}`, data);
+    const response = await apiClient.patch(`/asset-performance/${id}`, data);
+    return response.data;
+  },
+
+  // update asset platform by platform id
+  updateAssetPlatform: async ({
+    id,
+    data,
+  }: {
+    id: string;
+    data: {
+      name: string;
+      asset?: string;
+      active?: boolean;
+    };
+  }) => {
+    const response = await apiClient.patch(
+      `/asset-performance/platforms/${id}`,
+      data
+    );
     return response.data;
   },
 };

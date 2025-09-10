@@ -65,3 +65,24 @@ export const useUpdateAssetPerformance = () => {
     },
   });
 };
+
+// update asset platform
+export const useUpdateAssetPlatform = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: assetPerformanceApi.updateAssetPlatform,
+    onSuccess: (data) => {
+      toast.success(data?.message || "Asset Platform updated successfully!");
+      queryClient.invalidateQueries({
+        queryKey: assetPerformanceQueryKeys.assetPlatforms,
+      });
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || "Asset Platform Update failed"
+      );
+    },
+  });
+};
