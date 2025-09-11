@@ -88,7 +88,7 @@ export default function DataForms() {
             {isEditingSystemStatus ? (
               <SystemStatusForm />
             ) : (
-              <Card className="h-full">
+              <Card>
                 <CardContent>
                   <SystemStatus />
                 </CardContent>
