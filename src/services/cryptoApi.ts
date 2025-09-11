@@ -78,12 +78,6 @@ export const cryptoApi = {
     return response.data;
   },
 
-  // Get the system status data
-  getSystemStatus: async () => {
-    const response = await apiClient.get("/crypto/system/status");
-    return response.data;
-  },
-
   // Get all daily report data
   getDailyReports: async () => {
     const response = await apiClient.get("/daily-report");

@@ -131,14 +131,6 @@ export const usePortfolioLatestData = () => {
   });
 };
 
-// Fetches the system status data
-export const useSystemStatus = () => {
-  return useQuery({
-    queryKey: cryptoQueryKeys.portfolio(),
-    queryFn: () => cryptoApi.getSystemStatus(),
-  });
-};
-
 // Fetches the all report data
 export const useReports = () => {
   return useQuery({

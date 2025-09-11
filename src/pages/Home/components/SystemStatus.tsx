@@ -1,4 +1,3 @@
-import { useSystemStatus } from "@/queries/cryptoQueries";
 import React from "react";
 import {
   IconAllSystemsCheckmark,
@@ -8,6 +7,7 @@ import {
   IconRiskManagement,
   IconTradingEngine,
 } from "../icons";
+import { useSystemStatus } from "@/queries/systemStatusQueries";
 
 interface SystemItemProps {
   icon: React.ReactNode;
