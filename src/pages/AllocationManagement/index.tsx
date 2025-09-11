@@ -22,7 +22,6 @@ export default function AllocationsManagementPage() {
   const { setTitle } = useTitleStore();
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
-  const { isPending, data } = useAllocations();
 
   const [isAddAllocationModalOpen, setIsAddAllocationModalOpen] =
     useState(false);
@@ -35,6 +34,7 @@ export default function AllocationsManagementPage() {
   const [allocationToDeleteKey, setAllocationToDeleteKey] =
     useState<string>("");
 
+  const { isPending, data } = useAllocations();
   const { mutate: deleteAllocation, isPending: isDeleteAllocationPending } =
     useDeleteAllocation();
   const { isPending: isCreateAllocationPending, mutate: createAllocation } =
