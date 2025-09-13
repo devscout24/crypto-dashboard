@@ -1,4 +1,5 @@
 import { CalendarDays } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type {
   TPerformanceReportApiResponse,
   TPerformanceReportCard,
@@ -10,10 +11,19 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useReports } from "@/queries/cryptoQueries";
+import { useEffect, useState } from "react";
 
 export default function DailyReportCard() {
-  const { data } = useReports();
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 10;
+  const { data, refetch } = useReports({ page: currentPage, limit });
   console.log({ data });
+
+  useEffect(() => {
+    if (currentPage !== 1) {
+      refetch();
+    }
+  }, [currentPage, refetch]);
 
   const performanceReportCards =
     data?.data &&
@@ -49,6 +59,8 @@ export default function DailyReportCard() {
         },
       };
     });
+
+  const totalPages = data?.meta?.totalPages || 1;
 
   return (
     <section className="flex flex-col gap-4">
@@ -121,6 +133,27 @@ export default function DailyReportCard() {
             )
           )}
       </Accordion>
+      <div className="flex justify-center items-center gap-4 mt-4">
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => {
+            setCurrentPage(currentPage - 1);
+          }}
+        >
+          Previous
+        </Button>
+        <p>
+          Page {currentPage} of {totalPages}
+        </p>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => {
+            setCurrentPage(currentPage + 1);
+          }}
+        >
+          Next
+        </Button>
+      </div>
     </section>
   );
 }

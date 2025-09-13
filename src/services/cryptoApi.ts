@@ -79,8 +79,8 @@ export const cryptoApi = {
   },
 
   // Get all daily report data
-  getDailyReports: async () => {
-    const response = await apiClient.get("/daily-report");
+  getDailyReports: async (params: { page?: number; limit?: number }) => {
+    const response = await apiClient.get("/daily-report", { params });
     return response.data;
   },
 

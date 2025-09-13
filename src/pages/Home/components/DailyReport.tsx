@@ -17,7 +17,7 @@ export default function DailyReport({
   const [selectedReport, setSelectedReport] =
     useState<TPerformanceReportCard | null>(null);
 
-  const { data } = useReports();
+  const { data } = useReports({});
 
   const performanceReportCards =
     data?.data &&
