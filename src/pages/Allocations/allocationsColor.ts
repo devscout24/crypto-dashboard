@@ -4,8 +4,8 @@ export const allocationColors: Record<string, string> = {
   c: "#F2C916", // Yellow
   d: "#FF69B4", // Hotpink
   e: "#7b28bf",
-  f: "#F2C916",
-  g: "#F2C916",
+  f: "#d67a09",
+  g: "#0cede6",
   h: "#F2C916",
   i: "#F2C916",
   j: "#F2C916",

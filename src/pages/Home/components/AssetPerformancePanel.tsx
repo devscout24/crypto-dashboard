@@ -234,7 +234,7 @@ export default function AssetPerformancePanel({
           </Button>
           <Button onClick={() => setIsAddingPlatform(true)}>
             <Plus className="h-4 w-4 mr-1" />
-            Add Platform
+            Add Stablecoin
           </Button>
         </div>
       )}

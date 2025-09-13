@@ -120,13 +120,13 @@ export default function Allocations() {
     setStatics([
       {
         title: "Starting Balance",
-        total: firstRecord
-          ? `$${firstRecord.starting_balance.toLocaleString()}`
-          : "$0",
+        total: `$${current_balance.toFixed(2)}`,
       },
       {
         title: "Current Balance",
-        total: `$${current_balance.toFixed(2)}`,
+        total: firstRecord
+          ? `$${firstRecord.starting_balance.toLocaleString()}`
+          : "$0",
       },
       {
         title: "Daily Performance",
