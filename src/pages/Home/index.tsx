@@ -7,7 +7,6 @@ import AssetPerformancePanel from "./components/AssetPerformancePanel";
 import DailyReport from "./components/DailyReport";
 import SystemStatus from "./components/SystemStatus";
 import AllAllocationCard from "./components/AllAllocationCard";
-import SSETestPanel from "./components/SSETestPanel";
 
 export default function HomePage() {
   const [value, setValue] = useState<string>("");
@@ -25,11 +24,6 @@ export default function HomePage() {
       </div>
 
       <div className="max-lg:py-2 space-y-4">
-        {/* SSE Test Panel - Only show in development */}
-        {import.meta.env.DEV && (
-          <SSETestPanel />
-        )}
-
         {/* Total NAV Panel Section */}
         <div className="grid grid-cols-4 gap-4">
           <div className="col-span-4 lg:col-span-3">

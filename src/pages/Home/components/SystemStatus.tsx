@@ -49,47 +49,29 @@ const SystemItem: React.FC<SystemItemProps> = ({ icon, name }) => (
 );
 
 export default function SystemStatus() {
-  const { data: apiData } = useSystemStatus();
-  const { data: sseData, isConnected: sseConnected } = useCryptoData({
-    enableRealtime: true,
-  });
-
-  // Use SSE data if available, otherwise fall back to API data
-  const data = sseData || apiData?.data;
-
-  // Show SSE connection status
-  const [showSSEStatus, setShowSSEStatus] = useState(false);
-
-  useEffect(() => {
-    if (sseConnected) {
-      setShowSSEStatus(true);
-      // Hide the status after 3 seconds
-      const timer = setTimeout(() => setShowSSEStatus(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [sseConnected]);
+  const { data } = useSystemStatus();
 
   // Map API visual_flags to system items
   const systemItems: SystemItemProps[] = [
     {
       name: "Smart Routing",
       icon: <IconTradingEngine />,
-      status: data?.visual_flags?.["Smart Routing"] || "Unknown",
+      status: data?.data?.visual_flags?.["Smart Routing"] || "Unknown",
     },
     {
       name: "Hedging Operational",
       icon: <IconRiskManagement />,
-      status: data?.visual_flags?.["Hedging Operational"] || "Unknown",
+      status: data?.data?.visual_flags?.["Hedging Operational"] || "Unknown",
     },
     {
       name: "Stablecoin Yield Layer",
       icon: <IconDataFeeds />,
-      status: data?.visual_flags?.["Stablecoin Yield Layer"] || "Unknown",
+      status: data?.data?.visual_flags?.["Stablecoin Yield Layer"] || "Unknown",
     },
     {
       name: "System Sync",
       icon: <IconCompliance />,
-      status: data?.visual_flags?.["System Sync"] || "Unknown",
+      status: data?.data?.visual_flags?.["System Sync"] || "Unknown",
     },
   ];
 
@@ -103,8 +85,8 @@ export default function SystemStatus() {
   );
 
   // Format last_updated timestamp
-  const lastUpdated = data?.last_updated
-    ? new Date(data.last_updated).toLocaleTimeString([], {
+  const lastUpdated = data?.data?.last_updated
+    ? new Date(data.data.last_updated).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
@@ -120,23 +102,13 @@ export default function SystemStatus() {
           style={{ color: "var(--color-foreground)" }}
         >
           System Status
-          {sseConnected && (
-            <span className="ml-2 text-xs text-green-500">● Live</span>
-          )}
         </h2>
-        <div className="flex flex-col items-end gap-1">
-          <span
-            className="text-xs"
-            style={{ color: "var(--color-muted-foreground)" }}
-          >
-            Last check: {lastUpdated}
-          </span>
-          {showSSEStatus && (
-            <span className="text-xs text-green-500">
-              Real-time updates active
-            </span>
-          )}
-        </div>
+        <span
+          className="text-xs"
+          style={{ color: "var(--color-muted-foreground)" }}
+        >
+          Last check: {lastUpdated}
+        </span>
       </div>
 
       {/* Status Grid */}
