@@ -132,10 +132,10 @@ export const usePortfolioLatestData = () => {
 };
 
 // Fetches the all report data
-export const useReports = () => {
+export const useReports = (params: { page?: number; limit?: number }) => {
   return useQuery({
     queryKey: cryptoQueryKeys.dailyReport,
-    queryFn: () => cryptoApi.getDailyReports(),
+    queryFn: () => cryptoApi.getDailyReports(params),
   });
 };
 

@@ -181,25 +181,23 @@ export default function AssetPerformanceForm({
         )}
 
         {/* Change Persent */}
-        {selectedRowToEdit?.id && (
-          <FormField
-            control={form.control}
-            name="changePercent"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Change Percent</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name="changePercent"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Change Percent</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* asset  */}
         {selectedRowToEdit?.platformId && (

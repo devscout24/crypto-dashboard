@@ -146,13 +146,13 @@ export default function AssetPerformancePanel({
       accessorKey: "open",
       header: "Open",
       enableHiding: true,
-      cell: ({ row }) => <p>{`+${row.original.open}$`}</p>,
+      cell: ({ row }) => <p>{`${row.original.open}$`}</p>,
     },
     {
       accessorKey: "close",
       header: "Close",
       enableHiding: true,
-      cell: ({ row }) => <p>{`+${row.original.close}$`}</p>,
+      cell: ({ row }) => <p>{`${row.original.close}$`}</p>,
     },
     {
       accessorKey: "change",
@@ -234,7 +234,7 @@ export default function AssetPerformancePanel({
           </Button>
           <Button onClick={() => setIsAddingPlatform(true)}>
             <Plus className="h-4 w-4 mr-1" />
-            Add Platform
+            Add Stablecoin
           </Button>
         </div>
       )}

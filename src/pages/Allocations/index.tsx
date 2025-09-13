@@ -75,12 +75,13 @@ export default function Allocations() {
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )[0];
+      const firstRecord = history[history.length - 1];
 
       return {
         date,
         minute_gain: avgMinuteGain,
         minute_gain_percent: avgMinuteGainPercent,
-        ending_balance: latestRecord.ending_balance,
+        ending_balance: firstRecord.starting_balance.toLocaleString(),
         notes: latestRecord.notes,
       };
     });
@@ -95,7 +96,7 @@ export default function Allocations() {
         ).toLocaleString()}`,
         percentChange: `${item.minute_gain_percent >= 0 ? "+" : "-"}${Math.abs(
           item.minute_gain_percent
-        )}%`,
+        ).toFixed(2)}%`,
         notes: item.notes,
       })
     );
@@ -120,13 +121,13 @@ export default function Allocations() {
     setStatics([
       {
         title: "Starting Balance",
-        total: firstRecord
-          ? `$${firstRecord.starting_balance.toLocaleString()}`
-          : "$0",
+        total: `$${current_balance.toFixed(2)}`,
       },
       {
         title: "Current Balance",
-        total: `$${current_balance.toFixed(2)}`,
+        total: firstRecord
+          ? `$${firstRecord.starting_balance.toLocaleString()}`
+          : "$0",
       },
       {
         title: "Daily Performance",
