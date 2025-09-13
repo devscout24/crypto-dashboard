@@ -146,13 +146,13 @@ export default function AssetPerformancePanel({
       accessorKey: "open",
       header: "Open",
       enableHiding: true,
-      cell: ({ row }) => <p>{`+${row.original.open}$`}</p>,
+      cell: ({ row }) => <p>{`${row.original.open}$`}</p>,
     },
     {
       accessorKey: "close",
       header: "Close",
       enableHiding: true,
-      cell: ({ row }) => <p>{`+${row.original.close}$`}</p>,
+      cell: ({ row }) => <p>{`${row.original.close}$`}</p>,
     },
     {
       accessorKey: "change",

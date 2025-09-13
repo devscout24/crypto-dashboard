@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import DatePicker from "@/components/DatePicker";
-import { useReportById, useUpdateReport } from "@/queries/cryptoQueries";
+import { useUpdateReport } from "@/queries/cryptoQueries";
 import { useEffect } from "react";
-import type { TDailyReportPayload } from "@/types";
+import type { TDailyReportPayload, TPerformanceReportCard } from "@/types";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const dailyReportSchema = z.object({
@@ -22,8 +22,6 @@ const dailyReportSchema = z.object({
   headline: z.string().min(1, "Headline is required"),
   subheadline: z.string().min(1, "Subheadline is required"),
   starting_nav: z.number().min(0, "Starting NAV must be a positive number"),
-  capital_in: z.number().min(0, "Capital In must be a positive number"),
-  capital_out: z.number().min(0, "Capital Out must be a positive number"),
   net_system_growth_percent: z.number(),
   ending_nav: z.number().min(0, "Ending NAV must be a positive number"),
   daily_growth_rate: z.number(),
@@ -32,65 +30,45 @@ const dailyReportSchema = z.object({
 type DailyReportFormProps = {
   reportId?: string;
   closeModal?: () => void;
+  reportData?: TPerformanceReportCard;
 };
 
 export default function DailyReportForm({
   reportId,
+  reportData,
   closeModal,
 }: DailyReportFormProps) {
+  console.log({ reportData });
+
   const form = useForm<z.infer<typeof dailyReportSchema>>({
     resolver: zodResolver(dailyReportSchema),
     defaultValues: {
-      date: "",
+      date: reportData?.date,
       headline: "",
       subheadline: "",
       starting_nav: 0,
-      capital_in: 0,
-      capital_out: 0,
       net_system_growth_percent: 0,
       ending_nav: 0,
       daily_growth_rate: 0,
     },
   });
 
-  // Only fetch by date if no initialData is provided and reportDate exists
-  const { data: reportData } = useReportById(reportId ? reportId : "");
   const { mutate: updateReport, isPending: isUpdating } = useUpdateReport();
 
   // Handle form reset when initialData or reportData changes
   useEffect(() => {
-    const dataToUse = reportData?.data;
-
-    if (dataToUse) {
-      // Format date for form
-      let formattedDate = "";
-      if (dataToUse.createdAt) {
-        try {
-          formattedDate = new Date(dataToUse.createdAt)
-            .toISOString()
-            .split("T")[0];
-        } catch (e) {
-          console.error("Error parsing date:", e);
-          formattedDate = "";
-        }
-      }
-
-      // Extract headline and subheadline from note
-      const noteLines = dataToUse.note?.split("\n") || [];
-      console.log({ noteLines });
+    if (reportData) {
+      const noteLines = reportData.description?.split("\n") || [];
 
       form.reset({
-        date: formattedDate,
+        date: reportData?.date,
         headline: noteLines[0],
         subheadline: noteLines[1],
-        starting_nav: parseFloat(dataToUse.starting || "0"),
-        capital_in: parseFloat(dataToUse.capital_in || "0"),
-        capital_out: parseFloat(dataToUse.capital_out || "0"),
-        net_system_growth_percent: parseFloat(
-          dataToUse.net_system_growth_percent || "0"
-        ),
-        ending_nav: parseFloat(dataToUse.ending || "0"),
-        daily_growth_rate: parseFloat(dataToUse.growthRate || "0"),
+        starting_nav:
+          parseFloat(reportData.startingNAV.replace(/[$,]/g, "")) || 0,
+        net_system_growth_percent: reportData.growthRate.value,
+        ending_nav: parseFloat(reportData.endingNAV.replace(/[$,]/g, "")) || 0,
+        daily_growth_rate: reportData.growthRate.value,
       });
     }
   }, [reportData, form]);
@@ -101,8 +79,6 @@ export default function DailyReportForm({
       headline: values.headline,
       subheadline: values.subheadline,
       starting_nav: values.starting_nav,
-      capital_in: values.capital_in,
-      capital_out: values.capital_out,
       net_system_growth_percent: values.net_system_growth_percent,
       ending_nav: values.ending_nav,
       daily_growth_rate: values.daily_growth_rate,
@@ -191,48 +167,6 @@ export default function DailyReportForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Starting NAV</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value) || 0)
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="capital_in"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Capital In</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value) || 0)
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="capital_out"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Capital Out</FormLabel>
                     <FormControl>
                       <Input
                         type="number"

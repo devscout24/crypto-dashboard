@@ -33,8 +33,8 @@ export type TDailyReportPayload = {
   headline: string;
   subheadline: string;
   starting_nav: number;
-  capital_in: number;
-  capital_out: number;
+  capital_in?: number;
+  capital_out?: number;
   net_system_growth_percent: number;
   ending_nav: number;
   daily_growth_rate: number;

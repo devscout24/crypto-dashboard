@@ -4,9 +4,9 @@ import type {
   TPerformanceReportCard,
 } from "@/types";
 import { Link } from "react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useReports } from "@/queries/cryptoQueries";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import DailyReportForm from "@/pages/DataForms/components/DailyReportForm";
 
 export default function DailyReport({
@@ -14,49 +14,47 @@ export default function DailyReport({
 }: {
   fromAdmin?: boolean;
 }) {
-  const [openDialog, setOpenDialog] = useState(false);
-  const [performanceReportCards, setPerformanceReportCards] = useState<
-    TPerformanceReportCard[]
-  >([]);
+  const [selectedReport, setSelectedReport] =
+    useState<TPerformanceReportCard | null>(null);
 
   const { data } = useReports();
 
-  useEffect(() => {
-    if (data && data.data) {
-      const formattedReports = data.data.map(
-        (item: TPerformanceReportApiResponse) => {
-          const growthValue = parseFloat(item?.growthRate || "0");
+  const performanceReportCards =
+    data?.data &&
+    data.data.map((item: TPerformanceReportApiResponse) => {
+      const growthValue = parseFloat(item?.growthRate || "0");
 
-          const noteLines = item.note.split("\n");
-          const reportTextIndex = noteLines.findIndex((line: string) =>
-            line.startsWith("- Daily Report Text:")
-          );
-          let description = item.note;
-          if (reportTextIndex !== -1) {
-            description = noteLines[reportTextIndex].substring(
-              "- Daily Report Text: ".length
-            );
-          }
-
-          return {
-            id: item.id,
-            description,
-            startingNAV: `$${parseFloat(item.starting).toLocaleString()}`,
-            endingNAV: `$${parseFloat(item.ending).toLocaleString()}`,
-            growthRate: {
-              value: growthValue,
-              sign: growthValue >= 0 ? "+" : "-",
-              color: growthValue >= 0 ? "green" : "red",
-              formatted: `${growthValue >= 0 ? "+" : ""}${Math.abs(
-                growthValue
-              ).toFixed(2)}%`,
-            },
-          };
-        }
+      const noteLines = item.note.split("\n");
+      const reportTextIndex = noteLines.findIndex((line: string) =>
+        line.startsWith("- Daily Report Text:")
       );
-      setPerformanceReportCards(formattedReports);
-    }
-  }, [data]);
+      let description = item.note;
+      if (reportTextIndex !== -1) {
+        description = noteLines[reportTextIndex].substring(
+          "- Daily Report Text: ".length
+        );
+      }
+
+      const formattedDate = new Date(item?.createdAt)
+        .toISOString()
+        .split("T")[0];
+
+      return {
+        id: item.id,
+        date: formattedDate,
+        description,
+        startingNAV: `$${parseFloat(item.starting).toLocaleString()}`,
+        endingNAV: `$${parseFloat(item.ending).toLocaleString()}`,
+        growthRate: {
+          value: growthValue,
+          sign: growthValue >= 0 ? "+" : "-",
+          color: growthValue >= 0 ? "green" : "red",
+          formatted: `${growthValue >= 0 ? "+" : ""}${Math.abs(
+            growthValue
+          ).toFixed(2)}%`,
+        },
+      };
+    });
 
   return (
     <section className="section-container h-full">
@@ -69,14 +67,15 @@ export default function DailyReport({
       <div className="h-full overflow-y-auto">
         {fromAdmin ? (
           <>
-            {performanceReportCards.map((item, i) => (
-              <Dialog key={i} open={openDialog} onOpenChange={setOpenDialog}>
-                <DialogTrigger asChild>
+            {performanceReportCards &&
+              performanceReportCards.map(
+                (item: TPerformanceReportCard, i: number) => (
                   <div
+                    key={i}
                     className={`flex items-start justify-between py-2 cursor-pointer ${
                       performanceReportCards.length - 1 === i ? "" : "border-b"
                     }`}
-                    onClick={() => setOpenDialog(true)}
+                    onClick={() => setSelectedReport(item)}
                   >
                     <p className="w-60 line-clamp-2 text-muted-foreground">
                       {item?.description}
@@ -91,39 +90,51 @@ export default function DailyReport({
                       {item?.growthRate.formatted}
                     </p>
                   </div>
-                </DialogTrigger>
-                <DialogContent className="">
+                )
+              )}
+            <Dialog
+              open={!!selectedReport}
+              onOpenChange={(open) => {
+                if (!open) setSelectedReport(null);
+              }}
+            >
+              <DialogContent className="">
+                {selectedReport && (
                   <DailyReportForm
-                    reportId={item?.id}
-                    closeModal={() => setOpenDialog(false)}
+                    reportId={selectedReport?.id}
+                    reportData={selectedReport}
+                    closeModal={() => setSelectedReport(null)}
                   />
-                </DialogContent>
-              </Dialog>
-            ))}
+                )}
+              </DialogContent>
+            </Dialog>
           </>
         ) : (
           <>
-            {performanceReportCards.map((item, i) => (
-              <div
-                key={i}
-                className={`flex items-start justify-between py-2 ${
-                  performanceReportCards.length - 1 === i ? "" : "border-b"
-                }`}
-              >
-                <p className="w-60 line-clamp-2 text-muted-foreground">
-                  {item?.description}
-                </p>
-                <p
-                  className={
-                    item.growthRate.sign === "+"
-                      ? "text-green-500"
-                      : "text-red-500"
-                  }
-                >
-                  {item.growthRate.formatted}
-                </p>
-              </div>
-            ))}
+            {performanceReportCards &&
+              performanceReportCards.map(
+                (item: TPerformanceReportCard, i: number) => (
+                  <div
+                    key={i}
+                    className={`flex items-start justify-between py-2 ${
+                      performanceReportCards.length - 1 === i ? "" : "border-b"
+                    }`}
+                  >
+                    <p className="w-60 line-clamp-2 text-muted-foreground">
+                      {item?.description}
+                    </p>
+                    <p
+                      className={
+                        item.growthRate.sign === "+"
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }
+                    >
+                      {item.growthRate.formatted}
+                    </p>
+                  </div>
+                )
+              )}
           </>
         )}
       </div>
