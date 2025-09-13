@@ -76,10 +76,13 @@ export type TCryptoDataUpdatePayload = {
 };
 
 export type TDailyReportPayload = {
-  note: string;
-  starting: string;
-  ending: string;
-  growthRate: string;
-  createdAt?: string;
-  updatedAt?: string;
+  date: string;
+  headline: string;
+  subheadline: string;
+  starting_nav: number;
+  capital_in: number;
+  capital_out: number;
+  net_system_growth_percent: number;
+  ending_nav: number;
+  daily_growth_rate: number;
 };

@@ -10,96 +10,103 @@ import {
   FormMessage,
   FormField,
 } from "@/components/ui/form";
-import type { TCoinData } from "@/types";
-import {
-  useUpdateAssetPerformance,
-  useUpdateAssetPlatform,
-} from "@/queries/assetPerformanceQueries";
 import { Switch } from "@/components/ui/switch";
+import {
+  useAssetPerformanceData,
+  useCreateAssetPerformance,
+} from "@/queries/assetPerformanceQueries"; // Import to get stablecoin ID
+import { useCreateAssetPlatform } from "@/queries/assetPerformanceQueries"; // Updated import
 
-const dailyReportSchema = z.object({
+const addAssetSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  openPrice: z.number().min(0, "Starting NAV must be a positive number"),
-  closePrice: z.number().min(0, "Starting NAV must be a positive number"),
-  volume: z.number().min(0, "Starting NAV must be a positive number"),
-  changePercent: z.number().min(0, "Ending NAV must be a positive number"),
-  asset: z.string().min(1, "Asset is required"),
-  active: z.boolean(),
+  openPrice: z
+    .number()
+    .min(0, "Open Price must be a positive number")
+    .optional(),
+  closePrice: z
+    .number()
+    .min(0, "Close Price must be a positive number")
+    .optional(),
+  volume: z.number().min(0, "Volume must be a positive number").optional(),
+  changePercent: z
+    .number()
+    .min(0, "Change Percent must be a positive number")
+    .optional(),
+  asset: z.string().min(1, "Asset Symbol is required").optional(),
+  active: z.boolean().optional(),
 });
 
-export default function AssetPerformanceForm({
-  selectedRowToEdit,
-  onClose,
-}: {
-  selectedRowToEdit: TCoinData;
-  onClose?: () => void;
-}) {
-  console.log({ selectedRowToEdit });
+type AddAssetFormProps = {
+  isPlatform: boolean;
+  onClose: () => void;
+};
 
-  const form = useForm<z.infer<typeof dailyReportSchema>>({
-    resolver: zodResolver(dailyReportSchema),
+export default function AddAssetForm({
+  isPlatform,
+  onClose,
+}: AddAssetFormProps) {
+  const { data: assetPerformanceData } = useAssetPerformanceData();
+  const stablecoin = assetPerformanceData?.data.find(
+    (item: { symbol: string }) => item.symbol === "Stablecoin"
+  );
+
+  const form = useForm<z.infer<typeof addAssetSchema>>({
+    resolver: zodResolver(addAssetSchema),
     defaultValues: {
-      name: selectedRowToEdit?.name || "",
-      openPrice: selectedRowToEdit?.open || 0,
-      closePrice: selectedRowToEdit?.close || 0,
-      volume: selectedRowToEdit?.volume || 0,
-      changePercent: selectedRowToEdit?.change || 0,
-      asset: selectedRowToEdit?.symbol || "",
-      active: selectedRowToEdit?.active || false,
+      name: "",
+      openPrice: isPlatform ? undefined : 0,
+      closePrice: isPlatform ? undefined : 0,
+      volume: isPlatform ? undefined : 0,
+      changePercent: isPlatform ? undefined : 0,
+      asset: isPlatform ? "" : undefined,
+      active: isPlatform ? false : undefined,
     },
   });
 
-  const { mutate: updateAssetPerformance, isPending: isAssetUpdating } =
-    useUpdateAssetPerformance();
-  const { mutate: updateAssetPlatform, isPending: isPlatformUpdating } =
-    useUpdateAssetPlatform();
+  const { mutate: addAssetPerformance, isPending: isAssetAdding } =
+    useCreateAssetPerformance();
+  const { mutate: addAssetPlatform, isPending: isPlatformAdding } =
+    useCreateAssetPlatform();
 
-  async function onSubmit(values: z.infer<typeof dailyReportSchema>) {
-    const assetPayload = {
-      name: values.name,
-      open: values.openPrice,
-      close: values.closePrice,
-      changePercent: values.changePercent,
-      volumeUsd: values.volume,
-    };
-
-    const platformPayload = {
-      name: values.name,
-      asset: values.asset,
-      active: values.active,
-    };
-
-    if (selectedRowToEdit && selectedRowToEdit?.id) {
-      updateAssetPerformance(
-        {
-          id: selectedRowToEdit?.id || "",
-          data: assetPayload,
+  async function onSubmit(values: z.infer<typeof addAssetSchema>) {
+    if (isPlatform) {
+      const platformPayload = {
+        assetPerformanceId: stablecoin?.id || "",
+        platform: {
+          name: values.name,
+          asset: values.asset || "",
+          active: values.active || false,
         },
-        {
-          onSuccess: () => {
-            onClose?.();
-          },
-        }
-      );
-    } else if (selectedRowToEdit && selectedRowToEdit?.platformId) {
-      updateAssetPlatform(
-        {
-          id: selectedRowToEdit?.platformId || "",
-          data: platformPayload,
+      };
+      addAssetPlatform(platformPayload, {
+        onSuccess: () => {
+          onClose();
         },
-        {
-          onSuccess: () => {
-            onClose?.();
-          },
-        }
-      );
+      });
+    } else {
+      const assetPayload = {
+        name: values.name,
+        open: values.openPrice || 0,
+        close: values.closePrice || 0,
+        changePercent: values.changePercent || 0,
+        volumeUsd: values.volume || 0,
+        symbol: values.asset || "",
+        date: new Date().toISOString().split("T")[0],
+        minuteKey: new Date().toISOString().split("T")[1],
+      };
+
+      addAssetPerformance(assetPayload, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
     }
   }
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4  p-4">
-        {/* name */}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4">
+        {/* Name */}
         <FormField
           control={form.control}
           name="name"
@@ -110,6 +117,7 @@ export default function AssetPerformanceForm({
                 <Input
                   {...field}
                   onChange={(e) => field.onChange(e.target.value)}
+                  placeholder="Enter name"
                 />
               </FormControl>
               <FormMessage />
@@ -118,7 +126,7 @@ export default function AssetPerformanceForm({
         />
 
         {/* Open Price */}
-        {selectedRowToEdit?.id && (
+        {!isPlatform && (
           <FormField
             control={form.control}
             name="openPrice"
@@ -130,6 +138,7 @@ export default function AssetPerformanceForm({
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                    placeholder="Enter open price"
                   />
                 </FormControl>
                 <FormMessage />
@@ -139,7 +148,7 @@ export default function AssetPerformanceForm({
         )}
 
         {/* Volume */}
-        {selectedRowToEdit?.id && (
+        {!isPlatform && (
           <FormField
             control={form.control}
             name="volume"
@@ -151,6 +160,7 @@ export default function AssetPerformanceForm({
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                    placeholder="Enter volume"
                   />
                 </FormControl>
                 <FormMessage />
@@ -160,7 +170,7 @@ export default function AssetPerformanceForm({
         )}
 
         {/* Close Price */}
-        {selectedRowToEdit?.id && (
+        {!isPlatform && (
           <FormField
             control={form.control}
             name="closePrice"
@@ -172,6 +182,7 @@ export default function AssetPerformanceForm({
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                    placeholder="Enter close price"
                   />
                 </FormControl>
                 <FormMessage />
@@ -180,8 +191,8 @@ export default function AssetPerformanceForm({
           />
         )}
 
-        {/* Change Persent */}
-        {selectedRowToEdit?.id && (
+        {/* Change Percent */}
+        {!isPlatform && (
           <FormField
             control={form.control}
             name="changePercent"
@@ -193,6 +204,7 @@ export default function AssetPerformanceForm({
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                    placeholder="Enter change percent"
                   />
                 </FormControl>
                 <FormMessage />
@@ -201,28 +213,27 @@ export default function AssetPerformanceForm({
           />
         )}
 
-        {/* asset  */}
-        {selectedRowToEdit?.platformId && (
-          <FormField
-            control={form.control}
-            name="asset"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Asset Symbol</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.value)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        {/* Asset Symbol */}
+        <FormField
+          control={form.control}
+          name="asset"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Asset Symbol</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  placeholder="Enter asset symbol"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        {/* active switch */}
-        {selectedRowToEdit?.platformId && (
+        {/* Active Switch */}
+        {isPlatform && (
           <FormField
             control={form.control}
             name="active"
@@ -241,8 +252,8 @@ export default function AssetPerformanceForm({
           />
         )}
 
-        <Button type="submit" disabled={isAssetUpdating || isPlatformUpdating}>
-          {isAssetUpdating || isPlatformUpdating ? "Saving..." : "Save"}
+        <Button type="submit" disabled={isAssetAdding || isPlatformAdding}>
+          {isAssetAdding || isPlatformAdding ? "Adding..." : "Add"}
         </Button>
       </form>
     </FormProvider>

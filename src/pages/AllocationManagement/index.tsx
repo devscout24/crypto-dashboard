@@ -5,7 +5,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Plus, SquarePen, Trash } from "lucide-react";
-import AddAllocationForm from "./AddAllocationForm";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DialogWrapper } from "@/components/DialogWrapper";
 import { AlertDialogModal } from "@/components/AlertDialogModal";
@@ -16,32 +15,26 @@ import {
   useUpdateAllocation,
 } from "@/queries/cryptoQueries";
 import PageLoader from "@/components/Loader";
-
-type TAllocationData = {
-  id: string;
-  name: string;
-  key: string;
-  date: string;
-  currentBalance: number;
-  createdAt: string;
-  updatedAt: string;
-};
+import type { TAllocation } from "@/types";
+import AllocationForm from "./AllocationForm";
 
 export default function AllocationsManagementPage() {
   const { setTitle } = useTitleStore();
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
-  const { isPending, data } = useAllocations();
 
   const [isAddAllocationModalOpen, setIsAddAllocationModalOpen] =
     useState(false);
   const [isDeleteAllocationModalOpen, setIsDeleteAllocationModalOpen] =
     useState(false);
 
-  const [allocationToEditKey, setAllocationToEditKey] = useState<string>("");
+  const [allocationToEdit, setAllocationToEdit] = useState<TAllocation | null>(
+    null
+  );
   const [allocationToDeleteKey, setAllocationToDeleteKey] =
     useState<string>("");
 
+  const { isPending, data } = useAllocations();
   const { mutate: deleteAllocation, isPending: isDeleteAllocationPending } =
     useDeleteAllocation();
   const { isPending: isCreateAllocationPending, mutate: createAllocation } =
@@ -54,7 +47,7 @@ export default function AllocationsManagementPage() {
     return () => setTitle("Dashboard");
   }, [setTitle]);
 
-  const columns: ColumnDef<TAllocationData>[] = [
+  const columns: ColumnDef<TAllocation>[] = [
     {
       accessorKey: "index",
       header: "SL",
@@ -80,12 +73,23 @@ export default function AllocationsManagementPage() {
     },
     {
       accessorKey: "currentBalance",
-      header: () => <div className="text-center">Current Balance</div>,
+      header: () => <div className="text-center">Starting Balance</div>,
       enableHiding: true,
       size: 200,
       cell: ({ row }) => (
         <div className="text-center">
           {row.original.currentBalance.toFixed(2)}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "endingBalance",
+      header: () => <div className="text-center">Current Balance</div>,
+      enableHiding: true,
+      size: 200,
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.original.endingBalance.toFixed(2)}
         </div>
       ),
     },
@@ -114,7 +118,7 @@ export default function AllocationsManagementPage() {
                 size={"icon"}
                 onClick={() => {
                   setIsAddAllocationModalOpen(true);
-                  setAllocationToEditKey(row.original.key);
+                  setAllocationToEdit(row.original);
                 }}
               >
                 <SquarePen className="duration-150" />
@@ -158,7 +162,7 @@ export default function AllocationsManagementPage() {
         <Button
           onClick={() => {
             setIsAddAllocationModalOpen(true);
-            setAllocationToEditKey("");
+            setAllocationToEdit(null);
           }}
         >
           <Plus />
@@ -187,7 +191,7 @@ export default function AllocationsManagementPage() {
             min-[470px]:w-full
           "
         >
-          <DataTable<TAllocationData>
+          <DataTable<TAllocation>
             data={data?.data || []}
             columns={columns}
             isLoading={isPending}
@@ -205,10 +209,10 @@ export default function AllocationsManagementPage() {
       <DialogWrapper
         isOpen={isAddAllocationModalOpen}
         onOpenChange={setIsAddAllocationModalOpen}
-        title={allocationToEditKey ? "Edit Allocation" : "Add New Allocation"}
+        title={allocationToEdit ? "Edit Allocation" : "Add New Allocation"}
       >
-        <AddAllocationForm
-          allocationKey={allocationToEditKey ? allocationToEditKey : undefined}
+        <AllocationForm
+          allocationToEdit={allocationToEdit ? allocationToEdit : undefined}
           onClose={() => setIsAddAllocationModalOpen(false)}
           createAllocation={createAllocation}
           updateAllocation={updateAllocation}

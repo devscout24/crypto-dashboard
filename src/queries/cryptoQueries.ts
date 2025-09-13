@@ -15,7 +15,10 @@ export const cryptoQueryKeys = {
 } as const;
 
 // Fetches the chart data for the given period.
-export const useNavChartData = (params?: { period?: string }) => {
+export const useNavChartData = (params?: {
+  month?: number;
+  limit?: number;
+}) => {
   return useQuery({
     queryKey: cryptoQueryKeys.chartData(params),
     queryFn: () => cryptoApi.getNavChartData(params),
@@ -112,19 +115,19 @@ export const useAllocationByKey = (key: string) => {
   });
 };
 
+// fetches the alloation data for the given limit
+export const useAllocationByLimit = (key: string, limit: number) => {
+  return useQuery({
+    queryKey: cryptoQueryKeys.chartData({ key, limit }),
+    queryFn: () => cryptoApi.getAllocationByLimit(key, limit),
+  });
+};
+
 // Fetches the portfolio latest data
 export const usePortfolioLatestData = () => {
   return useQuery({
     queryKey: cryptoQueryKeys.portfolio(),
     queryFn: () => cryptoApi.getPortfolioLatestData(),
-  });
-};
-
-// Fetches the system status data
-export const useSystemStatus = () => {
-  return useQuery({
-    queryKey: cryptoQueryKeys.portfolio(),
-    queryFn: () => cryptoApi.getSystemStatus(),
   });
 };
 
@@ -137,11 +140,11 @@ export const useReports = () => {
 };
 
 // Fetches a single report by date
-export const useReportByDate = (date: string) => {
+export const useReportById = (id: string) => {
   return useQuery({
-    queryKey: [...cryptoQueryKeys.dailyReport, date],
-    queryFn: () => cryptoApi.getReportByDate(date),
-    enabled: !!date,
+    queryKey: [...cryptoQueryKeys.dailyReport, id],
+    queryFn: () => cryptoApi.getReportById(id),
+    enabled: !!id,
   });
 };
 

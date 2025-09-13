@@ -16,8 +16,8 @@ import Loader from "@/components/Loader";
 import type { NavChartData } from "@/types/chart";
 import CustomTooltipContent from "./CustomTooltipContent";
 import CustomTooltipCursor from "./CustomTooltipCursor";
-import { useChartData } from "@/hooks/useChartData";
-import ErrorMessage from "@/components/ErrorMessage";
+import { Button } from "@/components/ui/button";
+import { useNavChartData } from "@/queries/cryptoQueries";
 
 const chartConfig = {
   total_nav: {
@@ -57,23 +57,32 @@ function ChartContent({ activeMonth }: { activeMonth: string }) {
   const [maxValue, setMaxValue] = useState(1000);
   const [dynamicTicks, setDynamicTicks] = useState<number[]>([]);
 
-  const currentMonth = new Date()
-    .toLocaleString("default", { month: "long" })
-    .toLowerCase();
+  // const currentMonth = new Date()
+  //   .toLocaleString("default", { month: "long" })
+  //   .toLowerCase();
+
+  // const {
+  //   data: dataToUse,
+  //   isLoading,
+  //   isSocketActive,
+  //   emit,
+  //   refetchApiData,
+  // } = useChartData(activeMonth, currentMonth);
+
+  const monthNumber = new Date(`${activeMonth} 1, 2000`).getMonth() + 1;
+  console.log(monthNumber);
 
   const {
     data: dataToUse,
     isLoading,
-    error,
-    isSocketActive,
-    requestChartData,
-  } = useChartData(activeMonth, currentMonth);
+    refetch: refetchApiData,
+  } = useNavChartData({ month: monthNumber, limit: 250 });
 
   // Process chart data
   useEffect(() => {
-    if (Array.isArray(dataToUse) && dataToUse.length > 0) {
-      const formattedData = dataToUse
-        .map((d: NavChartData) => {
+    if (Array.isArray(dataToUse?.data) && dataToUse?.data?.length > 0) {
+      const formattedData = dataToUse?.data
+        .map((d: TNavChartData) => {
           const dateField = d.datetime;
           const navField = d.nav;
 
@@ -93,7 +102,9 @@ function ChartContent({ activeMonth }: { activeMonth: string }) {
             day: new Date(dateField).getDate(),
           };
         })
-        .filter((item) => item !== null) as FormattedNavChartData[];
+        .filter(
+          (item: TFormattedNavChartData) => item !== null
+        ) as TFormattedNavChartData[];
 
       if (formattedData.length === 0) {
         console.warn("No valid data after formatting");
@@ -206,16 +217,24 @@ function ChartContent({ activeMonth }: { activeMonth: string }) {
 
   if (chartData.length === 0) {
     return (
-      <ErrorMessage
-        title="No Data"
-        message={`No data available for ${
-          activeMonth.charAt(0).toUpperCase() + activeMonth.slice(1)
-        }. Try selecting a different month.`}
-        buttonText={isSocketActive ? "Retry" : "Reload"}
-        onButtonClick={() =>
-          requestChartData(activeMonth, new Date().getFullYear())
-        }
-      />
+      <div className="text-center p-4 h-[230px] flex items-center justify-center">
+        <div>
+          <p>
+            No data available for{" "}
+            {activeMonth.charAt(0).toUpperCase() + activeMonth.slice(1)}
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            Try selecting a different month
+          </p>
+          <Button
+            variant={"outline"}
+            onClick={() => refetchApiData()}
+            className="mt-2"
+          >
+            Reload
+          </Button>
+        </div>
+      </div>
     );
   }
 

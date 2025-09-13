@@ -1,8 +1,9 @@
 import SelectInput, { type SelectOption } from "@/components/SelectInput";
 import TotalNavChart from "./TotalNavChart";
 import { useState } from "react";
-import { useChartData } from "@/hooks/useChartData";
+import type { TNavChartData } from "@/types";
 import { cn } from "@/lib/utils";
+import { useNavChartData } from "@/queries/cryptoQueries";
 
 const monthOptions: SelectOption[] = [
   { value: "january", label: "January" },
@@ -22,17 +23,31 @@ const monthOptions: SelectOption[] = [
 export default function TotalNavPanel() {
   const currentMonth = new Date().toLocaleString("default", { month: "long" });
   const [selected, setSelected] = useState<string>(currentMonth.toLowerCase());
-  const activeMonth = selected || currentMonth;
 
-  const { data: navChartData } = useChartData(activeMonth);
+  const { data: navChartData } = useNavChartData();
+
+  // const activeMonth = selected || currentMonth;
+
+  // Request data when month changes or component mounts
+  // useEffect(() => {
+  //   if (isConnected) {
+  //     const requestData = {
+  //       month: activeMonth,
+  //       year: new Date().getFullYear(),
+  //     };
+
+  //     console.log("Requesting chart data for:", requestData);
+  //     emit("request_chart_data", requestData);
+  //   }
+  // }, [activeMonth, isConnected, emit]);
 
   const totalNav =
-    navChartData &&
-    navChartData.reduce((total: number, item) => {
-      return total + (item?.nav || 0);
+    navChartData?.data &&
+    navChartData?.data.reduce((total: number, item: TNavChartData) => {
+      return total + item?.nav;
     }, 0);
 
-  const lastTwo = navChartData && navChartData?.slice(-2);
+  const lastTwo = navChartData?.data && navChartData?.data.slice(-2);
 
   const lastTwoNavDiff =
     lastTwo &&

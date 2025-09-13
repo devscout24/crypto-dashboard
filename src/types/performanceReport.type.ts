@@ -1,4 +1,5 @@
 export type TPerformanceReportCard = {
+  id: string;
   date: string;
   description: string;
   startingNAV: string;
@@ -12,19 +13,13 @@ export type TPerformanceReportCard = {
 };
 
 export type TPerformanceReportApiResponse = {
-  createdAt: string;
+  id: string;
   note: string;
   starting: string;
   ending: string;
-  growthRate:
-    | number
-    | string
-    | {
-        value: number;
-        sign: "+" | "-";
-        color: "green" | "red";
-        formatted: string;
-      };
+  growthRate: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type TPerformanceRecord = {

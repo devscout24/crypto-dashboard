@@ -12,20 +12,27 @@ import NavSidebar from "./navSidebar";
 import type { NavItem, TAllocation } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useAllocations } from "@/queries/cryptoQueries";
+import { useProfile } from "@/queries/userQueries";
 
 export default function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const currentUser = useAuth();
 
+  const { data: userData } = useProfile();
   const { data } = useAllocations();
 
   const allocations =
-    data &&
-    data?.data.map((item: TAllocation) => ({
-      title: item?.name,
-      url: `/dashboard/allocations/${item.key.toLowerCase()}`,
-    }));
+    currentUser?.role === "ADMIN"
+      ? data?.data &&
+        data?.data.map((item: TAllocation) => ({
+          title: item?.name,
+          url: `/dashboard/allocations/${item.key.toLowerCase()}`,
+        }))
+      : userData?.data?.userAllocations.map((item) => ({
+          title: item?.allocation?.name,
+          url: `/dashboard/allocations/${item?.allocation?.key.toLowerCase()}`,
+        }));
 
   const items: NavItem[] = [
     {

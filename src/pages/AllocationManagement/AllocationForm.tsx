@@ -17,15 +17,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAllocationByKey } from "@/queries/cryptoQueries";
 import { useEffect } from "react";
-import { allocationOptions } from "./allocationOptions";
-import type { TAllocationPayload } from "@/types/allocation.type";
+import { allocationOptions, allocationTypes } from "./allocationOptions";
+import type { TAllocation, TAllocationPayload } from "@/types";
 
 const allocationSchema = z.object({
   key: z.string().min(1, "Allocation is required"),
   name: z.string().min(1, "Allocation name is required"),
   initialBalance: z.coerce.number().min(0, "Value must be a positive number"),
+  endingBalance: z.coerce.number().min(0, "Value must be a positive number"),
+  type: z.string().min(1, "Type is required"),
 });
 
 type UpdateAllocationParams = {
@@ -33,14 +34,14 @@ type UpdateAllocationParams = {
   data: TAllocationPayload;
 };
 
-export default function AddAllocationForm({
-  allocationKey,
+export default function AllocationForm({
+  allocationToEdit,
   onClose,
   createAllocation,
   updateAllocation,
   isPending,
 }: {
-  allocationKey: string | undefined;
+  allocationToEdit: TAllocation | undefined;
   onClose?: () => void;
   createAllocation: (data: TAllocationPayload) => void;
   updateAllocation: (params: UpdateAllocationParams) => void;
@@ -49,43 +50,41 @@ export default function AddAllocationForm({
   const form = useForm<z.infer<typeof allocationSchema>>({
     resolver: zodResolver(allocationSchema),
     defaultValues: {
-      key: "A",
-      name: "",
-      initialBalance: 0,
+      key: allocationToEdit?.key || "",
+      name: allocationToEdit?.name || "",
+      initialBalance: allocationToEdit?.currentBalance || 0,
+      endingBalance: allocationToEdit?.endingBalance || 0,
+      type: allocationToEdit?.type || "",
     },
   });
 
-  const { data: allocationData } = useAllocationByKey(allocationKey || "");
-
   useEffect(() => {
-    if (allocationData && allocationKey) {
+    if (allocationToEdit) {
+      console.log("Resetting form with:", allocationToEdit);
       form.reset({
-        key: allocationKey,
-        name: allocationData?.data?.name,
-        initialBalance: allocationData?.data?.current_balance,
+        key: allocationToEdit?.key,
+        name: allocationToEdit?.name,
+        initialBalance: allocationToEdit?.currentBalance,
+        endingBalance: allocationToEdit?.endingBalance,
+        type: allocationToEdit?.type,
       });
-    } else if (!allocationKey) {
-      // Reset to default values for new allocations
-      form.reset({
-        key: "A",
-        name: "",
-        initialBalance: 0,
-      });
+      console.log("Form values after reset:", form.getValues());
     }
-  }, [allocationData, form, allocationKey]);
+  }, [form, allocationToEdit]);
 
   function onSubmit(values: z.infer<typeof allocationSchema>) {
-    console.log("Allocation Form Submitted", values);
     const payload = {
       key: values.key,
       name: values.name,
       initialBalance: values.initialBalance,
+      endingBalance: values.endingBalance,
+      type: values.type,
     };
 
-    if (allocationKey && updateAllocation) {
-      updateAllocation({ key: allocationKey, data: payload });
+    if (allocationToEdit && updateAllocation) {
+      updateAllocation({ key: allocationToEdit?.key, data: payload });
       onClose?.();
-    } else if (!allocationKey && createAllocation) {
+    } else {
       createAllocation(payload);
       onClose?.();
     }
@@ -104,7 +103,11 @@ export default function AddAllocationForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Allocation</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                defaultValue={field.value}
+              >
                 <FormControl className="w-full">
                   <SelectTrigger>
                     <SelectValue placeholder="Select an allocation" />
@@ -153,8 +156,49 @@ export default function AddAllocationForm({
           )}
         />
 
+        {/* Ending Balance */}
+        <FormField
+          control={form.control}
+          name="endingBalance"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ending Balance</FormLabel>
+              <FormControl>
+                <Input {...field} type="number" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Allocation type */}
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Allocation Type</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl className="w-full">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an allocation" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {allocationTypes.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit" disabled={isPending}>
-          {allocationKey ? "Update Allocation" : "Create Allocation"}
+          {allocationToEdit ? "Update Allocation" : "Create Allocation"}
         </Button>
       </form>
     </FormProvider>

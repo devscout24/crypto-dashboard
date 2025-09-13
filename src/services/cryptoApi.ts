@@ -7,7 +7,7 @@ import type {
 
 export const cryptoApi = {
   //  Gets the chart data for the given period.
-  getNavChartData: async (params?: { period?: string }) => {
+  getNavChartData: async (params?: { month?: number; limit?: number }) => {
     const response = await apiClient.get("/crypto/chart-data", {
       params,
     });
@@ -64,15 +64,17 @@ export const cryptoApi = {
     return response.data;
   },
 
-  // Get the portfolio latest data
-  getPortfolioLatestData: async () => {
-    const response = await apiClient.get("/crypto/portfolio/latest");
+  // Get the allocation data for the given limit
+  getAllocationByLimit: async (key: string, limit: number) => {
+    const response = await apiClient.get(`/allocation/${key}/history`, {
+      params: { limit },
+    });
     return response.data;
   },
 
-  // Get the system status data
-  getSystemStatus: async () => {
-    const response = await apiClient.get("/crypto/system/status");
+  // Get the portfolio latest data
+  getPortfolioLatestData: async () => {
+    const response = await apiClient.get("/crypto/portfolio/latest");
     return response.data;
   },
 
@@ -83,8 +85,8 @@ export const cryptoApi = {
   },
 
   // Get daily report by date
-  getReportByDate: async (date: string) => {
-    const response = await apiClient.get(`/daily-report/${date}`);
+  getReportById: async (id: string) => {
+    const response = await apiClient.get(`/daily-report/${id}`);
     return response.data;
   },
 

@@ -4,7 +4,6 @@ import { useState } from "react";
 import TotalNavPanel from "./TotalNavPanel/components/TotalNavPanel";
 import AllocationBreakdown from "./components/AllocationBreakdown";
 import AssetPerformancePanel from "./components/AssetPerformancePanel";
-import FromTheNews from "./components/FromTheNews";
 import DailyReport from "./components/DailyReport";
 import SystemStatus from "./components/SystemStatus";
 import AllAllocationCard from "./components/AllAllocationCard";
@@ -52,8 +51,8 @@ export default function HomePage() {
             <AssetPerformancePanel />
           </div>
 
-          {/* Daily Report - spans 2 rows */}
-          <div className="col-span-4 lg:col-span-1">
+          {/* Daily Report  rows */}
+          <div className="col-span-4 lg:col-span-1 row-span-2">
             <DailyReport />
           </div>
 
@@ -67,9 +66,9 @@ export default function HomePage() {
           </div>
 
           {/* From the news */}
-          <div className="col-span-4 lg:col-span-1">
+          {/* <div className="col-span-4 lg:col-span-1">
             <FromTheNews />
-          </div>
+          </div> */}
         </div>
       </div>
     </section>
