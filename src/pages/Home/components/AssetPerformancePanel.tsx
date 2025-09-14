@@ -39,7 +39,7 @@ export default function AssetPerformancePanel({
   fromAdmin?: boolean;
 }) {
   const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(15);
+  const [limit, setLimit] = useState<number>(10);
   const [isAddingAsset, setIsAddingAsset] = useState(false);
   const [isAddingPlatform, setIsAddingPlatform] = useState(false);
   const [isEditingAssetPerformance, setIsEditingAssetPerformance] =

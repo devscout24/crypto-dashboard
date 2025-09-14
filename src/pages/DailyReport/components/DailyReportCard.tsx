@@ -12,12 +12,12 @@ import {
 } from "@/components/ui/accordion";
 import { useReports } from "@/queries/cryptoQueries";
 import { useEffect, useState } from "react";
+import DailyReportCardSkeleton from "./DailyReportCardSkeleton";
 
 export default function DailyReportCard() {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
-  const { data, refetch } = useReports({ page: currentPage, limit });
-  console.log({ data });
+  const { data, isLoading, refetch } = useReports({ page: currentPage, limit });
 
   useEffect(() => {
     if (currentPage !== 1) {
@@ -61,6 +61,10 @@ export default function DailyReportCard() {
     });
 
   const totalPages = data?.meta?.totalPages || 1;
+
+  if (isLoading) {
+    return <DailyReportCardSkeleton limit={limit} />;
+  }
 
   return (
     <section className="flex flex-col gap-4">
@@ -133,27 +137,29 @@ export default function DailyReportCard() {
             )
           )}
       </Accordion>
-      <div className="flex justify-center items-center gap-4 mt-4">
-        <Button
-          disabled={currentPage === 1}
-          onClick={() => {
-            setCurrentPage(currentPage - 1);
-          }}
-        >
-          Previous
-        </Button>
-        <p>
-          Page {currentPage} of {totalPages}
-        </p>
-        <Button
-          disabled={currentPage === totalPages}
-          onClick={() => {
-            setCurrentPage(currentPage + 1);
-          }}
-        >
-          Next
-        </Button>
-      </div>
+      {data?.data && data.data.length > 0 && (
+        <div className="flex justify-center items-center gap-4 mt-4">
+          <Button
+            disabled={currentPage === 1}
+            onClick={() => {
+              setCurrentPage(currentPage - 1);
+            }}
+          >
+            Previous
+          </Button>
+          <p>
+            Page {currentPage} of {totalPages}
+          </p>
+          <Button
+            disabled={currentPage === totalPages}
+            onClick={() => {
+              setCurrentPage(currentPage + 1);
+            }}
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </section>
   );
 }

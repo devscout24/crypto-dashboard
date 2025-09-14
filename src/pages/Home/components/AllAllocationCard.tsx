@@ -85,7 +85,7 @@ export default function AllAllocationCard() {
           {Array.from({ length: 3 }).map((_, idx) => (
             <div
               key={idx}
-              className="w-full border rounded-lg p-4 flex flex-col items-center"
+              className="w-full border rounded-lg p-4 flex flex-col items-center bg-sidebar"
             >
               <Skeleton className="size-20 rounded-full mb-4" />
               <Skeleton className="h-4 w-24 mb-2" />

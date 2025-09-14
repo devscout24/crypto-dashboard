@@ -3,9 +3,10 @@ import AllocationPieChart from "./AllocationPieChart";
 import { useState, useEffect } from "react";
 import { useAllocations } from "@/queries/cryptoQueries";
 import { allocationColors } from "@/pages/Allocations/allocationsColor";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AllocationBreakdown() {
-  const { data } = useAllocations();
+  const { data, isLoading } = useAllocations();
   const [chartData, setChartData] = useState<Allocation[]>([]);
 
   useEffect(() => {
@@ -33,7 +34,19 @@ export default function AllocationBreakdown() {
         <h3 className="font-bold">Allocation Breakdown</h3>
       </div>
 
-      {data?.data?.length > 0 ? (
+      {isLoading ? (
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="flex flex-col gap-4 mb-4 md:mb-0">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="flex items-center gap-4">
+                <Skeleton className="w-4 h-4 rounded-full" />
+                <Skeleton className="h-4 w-12" />
+              </div>
+            ))}
+          </div>
+          <Skeleton className="w-[180px] h-[180px] rounded-full" />
+        </div>
+      ) : data?.data?.length > 0 ? (
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="flex flex-col gap-4 mb-4 md:mb-0">
             {chartData.map((item) => (

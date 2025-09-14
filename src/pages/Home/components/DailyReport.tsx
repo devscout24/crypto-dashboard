@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useReports } from "@/queries/cryptoQueries";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import DailyReportForm from "@/pages/DataForms/components/DailyReportForm";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DailyReport({
   fromAdmin = false,
@@ -16,8 +17,7 @@ export default function DailyReport({
 }) {
   const [selectedReport, setSelectedReport] =
     useState<TPerformanceReportCard | null>(null);
-
-  const { data } = useReports({});
+  const { data, isLoading } = useReports({});
 
   const performanceReportCards =
     data?.data &&
@@ -55,6 +55,30 @@ export default function DailyReport({
         },
       };
     });
+
+  if (isLoading) {
+    return (
+      <section className="section-container h-full">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-8 w-20" />
+        </div>
+        <div className="h-full overflow-y-auto">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div
+              key={index}
+              className={`flex items-start justify-between py-2 ${
+                index === 4 ? "" : "border-b"
+              }`}
+            >
+              <Skeleton className="h-4 w-60" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="section-container h-full">
