@@ -135,7 +135,7 @@ export default function DailyReportForm({
                   <FormControl>
                     <Textarea
                       {...field}
-                      className="w-full max-h-28 resize-none"
+                      className="w-full max-h-28 resize-none border-[1px] border-primary/50"
                     />
                   </FormControl>
                   <FormMessage />
@@ -152,7 +152,7 @@ export default function DailyReportForm({
                   <FormControl>
                     <Textarea
                       {...field}
-                      className="w-full max-h-28 resize-none"
+                      className="w-full max-h-28 resize-none border-[1px] border-primary/50"
                     />
                   </FormControl>
                   <FormMessage />
@@ -175,6 +175,7 @@ export default function DailyReportForm({
                         onChange={(e) =>
                           field.onChange(parseFloat(e.target.value) || 0)
                         }
+                        className="border-[1px] border-primary/50"
                       />
                     </FormControl>
                     <FormMessage />
@@ -198,6 +199,7 @@ export default function DailyReportForm({
                         onChange={(e) =>
                           field.onChange(parseFloat(e.target.value) || 0)
                         }
+                        className="border-[1px] border-primary/50"
                       />
                     </FormControl>
                     <FormMessage />
@@ -219,6 +221,7 @@ export default function DailyReportForm({
                         onChange={(e) =>
                           field.onChange(parseFloat(e.target.value) || 0)
                         }
+                        className="border-[1px] border-primary/50"
                       />
                     </FormControl>
                     <FormMessage />
@@ -241,6 +244,7 @@ export default function DailyReportForm({
                       onChange={(e) =>
                         field.onChange(parseFloat(e.target.value) || 0)
                       }
+                      className="border-[1px] border-primary/50"
                     />
                   </FormControl>
                   <FormMessage />

@@ -126,6 +126,7 @@ export default function TotalNavForm() {
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                    className="border-[1px] border-primary/50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -145,6 +146,7 @@ export default function TotalNavForm() {
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                    className="border-[1px] border-primary/50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -155,7 +157,7 @@ export default function TotalNavForm() {
         <Button
           type="submit"
           disabled={updateNavData.isPending}
-          className="cursor-pointer"
+          className="cursor-pointer w-full"
         >
           {updateNavData.isPending ? "Submitting..." : "Update Total NAV"}
         </Button>

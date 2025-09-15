@@ -32,6 +32,7 @@ export const assetPerformanceApi = {
       close: number;
       changePercent?: number;
       volumeUsd: number;
+      yield_daily_percent?: number;
     };
   }) => {
     const response = await apiClient.patch(`/asset-performance/${id}`, data);

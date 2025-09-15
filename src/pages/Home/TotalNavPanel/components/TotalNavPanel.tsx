@@ -71,7 +71,7 @@ export default function TotalNavPanel() {
         <h3>
           Total NAV
           <p className="text-foreground text-[16px] font-bold ml-1">
-            {totalNav?.toFixed(2) || 1400000}
+            {totalNav?.toFixed(2) || "N/A"}
           </p>
         </h3>
 

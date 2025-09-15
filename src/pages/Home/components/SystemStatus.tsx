@@ -8,6 +8,7 @@ import {
   IconTradingEngine,
 } from "../icons";
 import { useSystemStatus } from "@/queries/systemStatusQueries";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SystemItemProps {
   icon: React.ReactNode;
@@ -55,47 +56,47 @@ const SystemItem: React.FC<SystemItemProps> = ({ icon, name }) => (
 );
 
 export default function SystemStatus() {
-  const { data } = useSystemStatus();
-  console.log({ data });
+  const { data, isLoading } = useSystemStatus();
 
-  // Dummy data
-  const systemItems: SystemItemProps[] = [
-    {
-      name: "Allocations A–G",
-      icon: <IconTradingEngine />,
-      status: "✅ Fully Compounding",
-    },
-    {
-      name: "Override Layer",
-      icon: <IconRiskManagement />,
-      status: "✅ Engaged",
-    },
-    {
-      name: "Surplus Redistribution",
-      icon: <IconDataFeeds />,
-      status: "✅ Active – Dual-Pool Trigger (D & F)",
-    },
-    {
-      name: "Passive Carry Stack",
-      icon: <IconCompliance />,
-      status: "✅ Functional",
-    },
-    {
-      name: "Syndicate Tiering",
-      icon: <IconAllSystemsCheckmark />,
-      status: "🔄 Weight Adjustment Phase",
-    },
-    {
-      name: "Trust Layer (LIE)",
-      icon: <IconOperationalCheckmark />,
-      status: "⚙️ Custody Approval Pending",
-    },
-    {
-      name: "Compliance Layer",
-      icon: <IconCompliance />,
-      status: "✅ All Systems Aligned",
-    },
-  ];
+  const systemItems: SystemItemProps[] = data?.data?.[0]
+    ? [
+        {
+          name: "Allocations A–G",
+          icon: <IconTradingEngine />,
+          status: data.data[0].allocations,
+        },
+        {
+          name: "Override Layer",
+          icon: <IconRiskManagement />,
+          status: data.data[0].overrideLayer,
+        },
+        {
+          name: "Surplus Redistribution",
+          icon: <IconDataFeeds />,
+          status: data.data[0].surplusRedistribution,
+        },
+        {
+          name: "Passive Carry Stack",
+          icon: <IconCompliance />,
+          status: data.data[0].passiveCarryStack,
+        },
+        {
+          name: "Syndicate Tiering",
+          icon: <IconAllSystemsCheckmark />,
+          status: data.data[0].syndicateTiering,
+        },
+        {
+          name: "Trust Layer (LIE)",
+          icon: <IconOperationalCheckmark />,
+          status: data.data[0].trustLayer,
+        },
+        {
+          name: "Compliance Layer",
+          icon: <IconCompliance />,
+          status: data.data[0].complianceLayer,
+        },
+      ]
+    : [];
 
   // Determine if all systems are operational
   const allSystemsOperational = systemItems.every((item) =>
@@ -103,11 +104,53 @@ export default function SystemStatus() {
   );
 
   // Format last_updated timestamp
-  const lastUpdated = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  const lastUpdated = data?.data?.[0]?.updatedAt
+    ? new Date(data.data[0].updatedAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
+    : new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+  if (isLoading) {
+    return (
+      <div className="lg:h-64 flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+
+        {/* Status Grid */}
+        <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2">
+          {Array.from({ length: 7 }).map((_, index) => (
+            <div key={index} className="flex items-center justify-between">
+              <div className="flex flex-1 items-center justify-start gap-3">
+                <Skeleton className="h-5 w-5" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+              <Skeleton className="h-6 w-40 rounded-full" />
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div
+          className="mt-auto border-t pt-4"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-5 w-5" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="lg:h-64 flex flex-col">
@@ -129,16 +172,22 @@ export default function SystemStatus() {
 
       {/* Status Grid */}
       <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2">
-        {systemItems.map((item) => (
-          <div key={item.name} className="flex items-center justify-between">
-            <SystemItem
-              icon={item.icon}
-              name={item.name}
-              status={item.status}
-            />
-            <StatusIndicator status={item.status} />
+        {systemItems.length > 0 ? (
+          systemItems.map((item) => (
+            <div key={item.name} className="flex items-center justify-between">
+              <SystemItem
+                icon={item.icon}
+                name={item.name}
+                status={item.status}
+              />
+              <StatusIndicator status={item.status} />
+            </div>
+          ))
+        ) : (
+          <div className="col-span-2 text-center text-muted-foreground">
+            No system status data available
           </div>
-        ))}
+        )}
       </div>
 
       {/* Footer */}

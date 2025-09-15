@@ -86,7 +86,7 @@ export function TimePicker({
         id="time"
         value={inputValue}
         placeholder="HH:MM"
-        className="bg-background pr-10"
+        className="bg-background pr-10 border-[1px] border-primary/50"
         onChange={handleInputChange}
         onKeyDown={(e) => {
           if (e.key === "ArrowDown") {

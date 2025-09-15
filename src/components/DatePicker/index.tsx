@@ -81,7 +81,7 @@ export default function DatePicker({
         id="date"
         value={inputValue}
         placeholder="June 01, 2025"
-        className="bg-background pr-10 w-full"
+        className="bg-background pr-10 w-full border-[1px] border-primary/50"
         onChange={handleInputChange}
         onKeyDown={(e) => {
           if (e.key === "ArrowDown") {

@@ -52,15 +52,6 @@ export default function AddAssetForm({
 
   const form = useForm<z.infer<typeof addAssetSchema>>({
     resolver: zodResolver(addAssetSchema),
-    defaultValues: {
-      name: "",
-      openPrice: isPlatform ? undefined : 0,
-      closePrice: isPlatform ? undefined : 0,
-      volume: isPlatform ? undefined : 0,
-      changePercent: isPlatform ? undefined : 0,
-      asset: isPlatform ? "" : undefined,
-      active: isPlatform ? false : undefined,
-    },
   });
 
   const { mutate: addAssetPerformance, isPending: isAssetAdding } =
@@ -117,7 +108,7 @@ export default function AddAssetForm({
                 <Input
                   {...field}
                   onChange={(e) => field.onChange(e.target.value)}
-                  placeholder="Enter name"
+                  className="border-[1px] border-primary/50"
                 />
               </FormControl>
               <FormMessage />
@@ -138,7 +129,7 @@ export default function AddAssetForm({
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                    placeholder="Enter open price"
+                    className="border-[1px] border-primary/50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -160,7 +151,7 @@ export default function AddAssetForm({
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                    placeholder="Enter volume"
+                    className="border-[1px] border-primary/50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -182,7 +173,7 @@ export default function AddAssetForm({
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                    placeholder="Enter close price"
+                    className="border-[1px] border-primary/50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -204,7 +195,7 @@ export default function AddAssetForm({
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                    placeholder="Enter change percent"
+                    className="border-[1px] border-primary/50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -224,7 +215,7 @@ export default function AddAssetForm({
                 <Input
                   {...field}
                   onChange={(e) => field.onChange(e.target.value)}
-                  placeholder="Enter asset symbol"
+                  className="border-[1px] border-primary/50"
                 />
               </FormControl>
               <FormMessage />
@@ -244,6 +235,7 @@ export default function AddAssetForm({
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="border-[1px] border-primary/50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -252,7 +244,11 @@ export default function AddAssetForm({
           />
         )}
 
-        <Button type="submit" disabled={isAssetAdding || isPlatformAdding}>
+        <Button
+          type="submit"
+          disabled={isAssetAdding || isPlatformAdding}
+          className="w-full"
+        >
           {isAssetAdding || isPlatformAdding ? "Adding..." : "Add"}
         </Button>
       </form>

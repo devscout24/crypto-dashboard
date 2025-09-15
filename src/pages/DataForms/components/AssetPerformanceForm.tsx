@@ -93,6 +93,22 @@ export default function AssetPerformanceForm({
           },
         }
       );
+
+      //  update platform yeild percentage
+      updateAssetPerformance(
+        {
+          id: selectedRowToEdit?.platformId || "",
+          data: {
+            ...assetPayload,
+            yield_daily_percent: values.changePercent,
+          },
+        },
+        {
+          onSuccess: () => {
+            onClose?.();
+          },
+        }
+      );
     }
   }
 
@@ -239,7 +255,11 @@ export default function AssetPerformanceForm({
           />
         )}
 
-        <Button type="submit" disabled={isAssetUpdating || isPlatformUpdating}>
+        <Button
+          type="submit"
+          disabled={isAssetUpdating || isPlatformUpdating}
+          className="w-full"
+        >
           {isAssetUpdating || isPlatformUpdating ? "Saving..." : "Save"}
         </Button>
       </form>
