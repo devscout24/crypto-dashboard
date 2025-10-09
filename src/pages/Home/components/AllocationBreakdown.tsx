@@ -1,13 +1,19 @@
-import type { Allocation, TAllocation } from "@/types/allocation.type";
+import type { TAllocation } from "@/types/allocation.type";
 import AllocationPieChart from "./AllocationPieChart";
 import { useState, useEffect } from "react";
 import { useAllocations } from "@/queries/cryptoQueries";
 import { allocationColors } from "@/pages/Allocations/allocationsColor";
 import { Skeleton } from "@/components/ui/skeleton";
 
+type ChartData = {
+  name: string;
+  value: number;
+  fill: string;
+};
+
 export default function AllocationBreakdown() {
   const { data, isLoading } = useAllocations();
-  const [chartData, setChartData] = useState<Allocation[]>([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
 
   useEffect(() => {
     if (data?.data) {
@@ -18,7 +24,7 @@ export default function AllocationBreakdown() {
       );
 
       // Format data for chart
-      const formattedChartData = data.data.map((item: TAllocation) => ({
+      const formattedChartData = data.data.map((item: TAllocation): ChartData => ({
         name: item.key,
         value: Number(((item.currentBalance / totalBalance) * 100).toFixed(2)),
         fill: allocationColors[item.key.toLocaleLowerCase()],

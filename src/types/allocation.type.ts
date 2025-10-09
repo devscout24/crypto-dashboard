@@ -1,6 +1,6 @@
 export type Allocation = {
   name: string;
-  value: number;
+  value: number | null;
   fill: string;
 };
 
